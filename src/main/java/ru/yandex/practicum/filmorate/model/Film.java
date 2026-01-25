@@ -4,14 +4,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-
-import java.time.Duration;
 import java.time.LocalDate;
 
 
 @Data
 @EqualsAndHashCode(of = {"id"})
-@Builder(toBuilder = true)
+@Builder
 public class Film {
     Long id;
     String name;

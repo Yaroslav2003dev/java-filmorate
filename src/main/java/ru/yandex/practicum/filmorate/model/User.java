@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 @Data
 @EqualsAndHashCode(of = {"id"})
-@Builder(toBuilder = true)
+@Builder
 public class User {
     Long id;
     String email;

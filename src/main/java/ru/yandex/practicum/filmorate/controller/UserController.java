@@ -42,7 +42,7 @@ public class UserController {
 
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
-        }else{
+        } else {
             user.setName(user.getName());
         }
         user.setId(getNextId());

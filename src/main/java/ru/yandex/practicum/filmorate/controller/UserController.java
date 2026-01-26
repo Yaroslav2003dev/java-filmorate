@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -11,11 +11,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {
     private Map<Long, User> users = new HashMap<>();
-    private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
     @GetMapping
     public Collection<User> findAll() {
@@ -23,16 +23,27 @@ public class UserController {
     }
 
     @PostMapping
-    public User create(@RequestBody User user) {
-        try {
-            validate(user);
-        } catch (ValidationException e) {
-            log.warn("Ошибка при добавлении пользователя", e);
-            throw e;
+    public User create(@Valid @RequestBody User user) {
+        if (user.getEmail() != null && user.getEmail().isBlank()) {
+            log.warn("email не может быть пустым");
+            throw new ValidationException("email не может быть пустым");
+        } else if (user.getEmail() != null && !user.getEmail().contains("@")) {
+            log.warn("email должен содержать @");
+            throw new ValidationException("email должен содержать @");
+        }
+        if (user.getBirthday() != null && user.getBirthday().isAfter(LocalDate.now())) {
+            log.warn("дата рождения не может быть в будущем");
+            throw new ValidationException("дата рождения не может быть в будущем");
+        }
+        if (user.getLogin() != null && user.getLogin().isBlank()) {
+            log.warn("login не может быть пустым");
+            throw new ValidationException("login не может быть пустым");
         }
 
-        if ((user.getName() == null || user.getName().isBlank())) {
+        if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
+        }else{
+            user.setName(user.getName());
         }
         user.setId(getNextId());
         users.put(user.getId(), user);
@@ -42,24 +53,45 @@ public class UserController {
 
 
     @PutMapping
-    public User update(@RequestBody User newUser) {
-        try {
-            validate(newUser);
-        } catch (ValidationException e) {
-            log.warn("Ошибка при обновлении информации о пользователе", e);
-            throw e;
+    public User update(@Valid @RequestBody User newUser) {
+        User user = users.get(newUser.getId());
+        if (newUser.getEmail() != null && newUser.getEmail().isBlank()) {
+            log.warn("email не может быть пустым");
+            throw new ValidationException("email не может быть пустым");
+        } else if (newUser.getEmail() != null && !newUser.getEmail().contains("@")) {
+            log.warn("email должен содержать @");
+            throw new ValidationException("email должен содержать @");
+        } else if (newUser.getEmail() != null) {
+            user.setEmail(newUser.getEmail());
         }
 
-        User user = users.get(newUser.getId());
-        user.setBirthday(newUser.getBirthday());
-        user.setEmail(newUser.getEmail());
-        user.setName(newUser.getName());
-        user.setLogin(newUser.getLogin());
+        if (newUser.getLogin() != null && newUser.getLogin().isBlank()) {
+            log.warn("login не может быть пустым");
+            throw new ValidationException("login не может быть пустым");
+        } else if (newUser.getLogin() != null) {
+            user.setLogin(newUser.getLogin());
+        }
+
+        if (newUser.getBirthday() != null && newUser.getBirthday().isAfter(LocalDate.now())) {
+            log.warn("дата рождения не может быть в будущем");
+            throw new ValidationException("дата рождения не может быть в будущем");
+        } else if (newUser.getBirthday() != null) {
+            user.setBirthday(newUser.getBirthday());
+        }
+
+        if (newUser.getName() != null) {
+            user.setName(newUser.getName());
+        }
+
+
         users.put(user.getId(), user);
         log.info("Обновлена информация о пользователе: {}", user);
         return user;
     }
 
+    public User getUserById(Long id) {
+        return users.get(id);
+    }
 
     private long getNextId() {
         long currentMaxId = users.keySet()
@@ -70,19 +102,6 @@ public class UserController {
         return ++currentMaxId;
     }
 
-    private void validate(User user) {
-        if (user.getEmail() == null || user.getEmail().isBlank()) {
-            throw new ValidationException("email не может быть пустым");
-        } else if (!user.getEmail().contains("@")) {
-            throw new ValidationException("email должен содержать @");
-        }
-        if ((user.getLogin() == null || user.getLogin().isBlank())) {
-            throw new ValidationException("login не может быть пустым");
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            throw new ValidationException("дата рождения не может быть в будущем");
-        }
-    }
 }
 
 

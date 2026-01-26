@@ -52,28 +52,28 @@ public class FilmController {
         if (newFilm.getName() != null && newFilm.getName().isBlank()) {
             log.warn("название не может быть пустым");
             throw new ValidationException("название не может быть пустым");
-        } else if (newFilm.getName() != null) {
+        } else {
             film.setName(newFilm.getName());
         }
 
         if (newFilm.getDescription() != null && newFilm.getDescription().length() > 200) {
             log.warn("максимальная длина описания — 200 символов");
             throw new ValidationException("максимальная длина описания — 200 символов");
-        } else if (newFilm.getDescription() != null) {
+        } else {
             film.setDescription(newFilm.getDescription());
         }
 
         if (newFilm.getReleaseDate() != null && newFilm.getReleaseDate().isBefore(LocalDate.of(1895, Month.DECEMBER, 28))) {
             log.warn("дата релиза не может быть раньше 28 декабря 1895 года");
             throw new ValidationException("дата релиза не может быть раньше 28 декабря 1895 года");
-        } else if (newFilm.getReleaseDate() != null) {
+        } else {
             film.setReleaseDate(newFilm.getReleaseDate());
         }
 
         if (newFilm.getDuration() != null && newFilm.getDuration() <= 0) {
             log.warn("продолжительность фильма должна быть положительным числом");
             throw new ValidationException("продолжительность фильма должна быть положительным числом");
-        } else if (newFilm.getDuration() != null) {
+        } else {
             film.setDuration(newFilm.getDuration());
         }
 

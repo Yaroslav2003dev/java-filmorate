@@ -61,21 +61,21 @@ public class UserController {
         } else if (newUser.getEmail() != null && !newUser.getEmail().contains("@")) {
             log.warn("email должен содержать @");
             throw new ValidationException("email должен содержать @");
-        } else if (newUser.getEmail() != null) {
+        } else {
             user.setEmail(newUser.getEmail());
         }
 
         if (newUser.getLogin() != null && newUser.getLogin().isBlank()) {
             log.warn("login не может быть пустым");
             throw new ValidationException("login не может быть пустым");
-        } else if (newUser.getLogin() != null) {
+        } else {
             user.setLogin(newUser.getLogin());
         }
 
         if (newUser.getBirthday() != null && newUser.getBirthday().isAfter(LocalDate.now())) {
             log.warn("дата рождения не может быть в будущем");
             throw new ValidationException("дата рождения не может быть в будущем");
-        } else if (newUser.getBirthday() != null) {
+        } else {
             user.setBirthday(newUser.getBirthday());
         }
 

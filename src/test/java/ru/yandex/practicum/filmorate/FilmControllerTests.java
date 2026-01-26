@@ -143,7 +143,7 @@ public class FilmControllerTests {
         filmController.create(film);
         filmController.update(filmNullDuration);
         //then
-        assertEquals(114, filmController.getFilmById(1L).getDuration());
+        assertEquals(null, filmController.getFilmById(1L).getDuration());
 
     }
 }

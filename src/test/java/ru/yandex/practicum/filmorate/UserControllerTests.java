@@ -135,6 +135,6 @@ public class UserControllerTests {
         userController.create(user);
         userController.update(userNoEmail);
         // then
-        assertEquals("yaroslav@mail.com", userController.getUserById(1L).getEmail());
+        assertEquals(null, userController.getUserById(1L).getEmail());
     }
 }

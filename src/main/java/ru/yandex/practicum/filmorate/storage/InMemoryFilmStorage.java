@@ -38,23 +38,15 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film addLike(Long id, Long userId) {
         Film film = getFilmById(id);
-        if (film.getLikesIdUsers().contains(userId)) {
-            return film;
-        } else {
-            film.getLikesIdUsers().add(userId);
-            return film;
-        }
+        film.getLikes().add(userId);
+        return film;
     }
 
     @Override
     public Film deleteLike(Long id, Long userId) {
         Film film = getFilmById(id);
-        if (film.getLikesIdUsers().contains(userId)) {
-            film.getLikesIdUsers().remove(userId);
-            return film;
-        } else {
-            return film;
-        }
+        film.getLikes().remove(userId);
+        return film;
     }
 
 

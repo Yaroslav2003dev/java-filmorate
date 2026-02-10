@@ -95,12 +95,10 @@ public class UserService {
     }
 
     public User addFriend(Long id, Long friendId) {
-        userStorage.addFriend(friendId, id);
         return userStorage.addFriend(id, friendId);
     }
 
     public User deleteFriend(Long id, Long friendId) {
-        userStorage.deleteFriend(friendId, id);
         return userStorage.deleteFriend(id, friendId);
     }
 

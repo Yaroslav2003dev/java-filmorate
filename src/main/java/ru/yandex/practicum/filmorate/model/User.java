@@ -7,7 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Builder(toBuilder = true)
@@ -20,5 +21,5 @@ public class User {
     String name;
     LocalDate birthday;
     @Builder.Default
-    ArrayList<Long> friends = new ArrayList<>();
+    Set<Long> friends = new HashSet<>();
 }

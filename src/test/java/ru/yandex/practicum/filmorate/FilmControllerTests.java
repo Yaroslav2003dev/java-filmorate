@@ -5,6 +5,11 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -14,7 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FilmControllerTests {
-    private final FilmController filmController = new FilmController();
+    FilmStorage filmStorage = new InMemoryFilmStorage();
+    UserStorage userStorage = new InMemoryUserStorage();
+    FilmService filmService = new FilmService(filmStorage, userStorage);
+    private final FilmController filmController = new FilmController(filmService);
 
     @Test
     @DisplayName("Добавление фильма c правильными данными")

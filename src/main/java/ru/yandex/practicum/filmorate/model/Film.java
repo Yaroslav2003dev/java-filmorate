@@ -15,13 +15,12 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Film implements Comparable<Film> {
-    Long id;
-    String name;
-    String description;
-    LocalDate releaseDate;
-    Integer duration;
-    @Builder.Default
-    Set<Long> likes = new HashSet<>();
+    private Long id;
+    private String name;
+    private String description;
+    private LocalDate releaseDate;
+    private Integer duration;
+    private Set<Long> likes = new HashSet<>();
 
     @Override
     public int compareTo(Film o) {

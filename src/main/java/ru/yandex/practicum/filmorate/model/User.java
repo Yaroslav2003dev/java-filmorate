@@ -15,11 +15,10 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
-    Long id;
-    String email;
-    String login;
-    String name;
-    LocalDate birthday;
-    @Builder.Default
-    Set<Long> friends = new HashSet<>();
+    private Long id;
+    private String email;
+    private String login;
+    private String name;
+    private LocalDate birthday;
+    private Set<Long> friends = new HashSet<>();
 }

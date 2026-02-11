@@ -15,7 +15,7 @@ import java.util.Set;
 @Slf4j
 @Service
 public class UserService {
-    UserStorage userStorage;
+    private final UserStorage userStorage;
 
     @Autowired
     public UserService(UserStorage userStorage) {
@@ -29,6 +29,18 @@ public class UserService {
 
 
     public User create(User user) {
+        validateCreate(user);
+        return userStorage.create(user);
+    }
+
+    public User update(User newUser) {
+        User user = userStorage.getUserById(newUser.getId());
+        validateUpdate(user, newUser);
+        log.info("Обновлена информация о пользователе: {}", user);
+        return user;
+    }
+
+    private void validateCreate(User user) {
         if (user.getEmail() != null && user.getEmail().isBlank()) {
             log.warn("email не может быть пустым");
             throw new ValidationException("email не может быть пустым");
@@ -53,12 +65,9 @@ public class UserService {
         } else {
             user.setName(user.getName());
         }
-
-        return userStorage.create(user);
     }
 
-    public User update(User newUser) {
-        User user = userStorage.getUserById(newUser.getId());
+    private void validateUpdate(User user, User newUser) {
         if (newUser.getEmail() != null && newUser.getEmail().isBlank()) {
             log.warn("email не может быть пустым");
             throw new ValidationException("email не может быть пустым");
@@ -86,9 +95,8 @@ public class UserService {
         if (newUser.getName() != null) {
             user.setName(newUser.getName());
         }
-        log.info("Обновлена информация о пользователе: {}", user);
-        return user;
     }
+
 
     public User getUserById(Long id) {
         return userStorage.getUserById(id);

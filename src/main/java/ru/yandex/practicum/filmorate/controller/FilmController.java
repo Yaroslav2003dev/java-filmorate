@@ -2,6 +2,8 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -22,33 +24,33 @@ public class FilmController {
     }
 
     @GetMapping
-    public Collection<Film> findAll() {
-        return filmService.findAll();
+    public ResponseEntity<Collection<Film>> findAll() {
+        return new ResponseEntity<>(filmService.findAll(), HttpStatus.OK);
     }
 
     @PostMapping
-    public Film create(@RequestBody Film film) {
-        return filmService.create(film);
+    public ResponseEntity<Film> create(@RequestBody Film film) {
+        return new ResponseEntity<>(filmService.create(film), HttpStatus.CREATED);
     }
 
     @PutMapping
-    public Film update(@RequestBody Film newFilm) {
-        return filmService.update(newFilm);
+    public ResponseEntity<Film> update(@RequestBody Film newFilm) {
+        return new ResponseEntity<>(filmService.update(newFilm), HttpStatus.OK);
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public Film addLike(@PathVariable Long id, @PathVariable Long userId) {
-        return filmService.addLike(id, userId);
+    public ResponseEntity<Film> addLike(@PathVariable Long id, @PathVariable Long userId) {
+        return new ResponseEntity<>(filmService.addLike(id, userId), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public Film deleteLike(@PathVariable Long id, @PathVariable Long userId) {
-        return filmService.deleteLike(id, userId);
+    public ResponseEntity<Film> deleteLike(@PathVariable Long id, @PathVariable Long userId) {
+        return new ResponseEntity<>(filmService.deleteLike(id, userId), HttpStatus.OK);
     }
 
     @GetMapping("/popular")
-    public Collection<Film> getTopFilms(@RequestParam(defaultValue = "10") Integer count) {
-        return filmService.getTopFilms(count);
+    public ResponseEntity<Collection<Film>> getTopFilms(@RequestParam(defaultValue = "10") Integer count) {
+        return new ResponseEntity<>(filmService.getTopFilms(count), HttpStatus.OK);
     }
 
     public Film getFilmById(Long id) {

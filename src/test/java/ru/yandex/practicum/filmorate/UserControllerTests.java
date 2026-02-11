@@ -34,7 +34,7 @@ public class UserControllerTests {
         //when
         userController.create(user);
         //then
-        assertEquals(1, userController.findAll().size());
+        assertEquals(1, userController.findAll().getBody().size());
     }
 
     @Test
@@ -50,7 +50,7 @@ public class UserControllerTests {
         //when
         userController.create(userNoEmail);
         //then
-        assertEquals(1, userController.findAll().size());
+        assertEquals(1, userController.findAll().getBody().size());
     }
 
     @Test
@@ -69,7 +69,7 @@ public class UserControllerTests {
                 () -> userController.create(userNoSym)
         );
         assertEquals("email должен содержать @", exception.getMessage());
-        assertTrue(userController.findAll().isEmpty());
+        assertTrue(userController.findAll().getBody().isEmpty());
     }
 
     @Test
@@ -85,7 +85,7 @@ public class UserControllerTests {
         // when
         userController.create(userNoName);
         //then
-        assertEquals(1, userController.findAll().size());
+        assertEquals(1, userController.findAll().getBody().size());
     }
 
     @Test
@@ -100,7 +100,7 @@ public class UserControllerTests {
                 .build();
         // when & then
         userController.create(userNoLogin);
-        assertEquals(1, userController.findAll().size());
+        assertEquals(1, userController.findAll().getBody().size());
     }
 
     @Test
@@ -119,7 +119,7 @@ public class UserControllerTests {
                 () -> userController.create(userFutureBirthday)
         );
         assertEquals("дата рождения не может быть в будущем", exception.getMessage());
-        assertTrue(userController.findAll().isEmpty());
+        assertTrue(userController.findAll().getBody().isEmpty());
     }
 
     @Test

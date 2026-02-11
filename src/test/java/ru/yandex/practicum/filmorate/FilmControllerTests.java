@@ -5,6 +5,11 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -14,7 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FilmControllerTests {
-    private final FilmController filmController = new FilmController();
+    FilmStorage filmStorage = new InMemoryFilmStorage();
+    UserStorage userStorage = new InMemoryUserStorage();
+    FilmService filmService = new FilmService(filmStorage, userStorage);
+    private final FilmController filmController = new FilmController(filmService);
 
     @Test
     @DisplayName("Добавление фильма c правильными данными")
@@ -29,7 +37,7 @@ public class FilmControllerTests {
         //when
         filmController.create(film);
         //then
-        assertEquals(1, filmController.findAll().size());
+        assertEquals(1, filmController.findAll().getBody().size());
     }
 
     @Test
@@ -48,7 +56,7 @@ public class FilmControllerTests {
                 () -> filmController.create(filmNoName)
         );
         assertEquals("название не может быть пустым", exception.getMessage());
-        assertTrue(filmController.findAll().isEmpty());
+        assertTrue(filmController.findAll().getBody().isEmpty());
     }
 
     @Test
@@ -67,7 +75,7 @@ public class FilmControllerTests {
                 () -> filmController.create(filmDescription201Characters)
         );
         assertEquals("максимальная длина описания — 200 символов", exception.getMessage());
-        assertTrue(filmController.findAll().isEmpty());
+        assertTrue(filmController.findAll().getBody().isEmpty());
     }
 
     @Test
@@ -83,7 +91,7 @@ public class FilmControllerTests {
         // when
         filmController.create(filmWithNullDescription);
         //then
-        assertEquals(1, filmController.findAll().size());
+        assertEquals(1, filmController.findAll().getBody().size());
     }
 
     @Test
@@ -102,7 +110,7 @@ public class FilmControllerTests {
                 () -> filmController.create(filmOldRelease)
         );
         assertEquals("дата релиза не может быть раньше 28 декабря 1895 года", exception.getMessage());
-        assertTrue(filmController.findAll().isEmpty());
+        assertTrue(filmController.findAll().getBody().isEmpty());
     }
 
 
@@ -122,7 +130,7 @@ public class FilmControllerTests {
                 () -> filmController.create(filmMinusDuration)
         );
         assertEquals("продолжительность фильма должна быть положительным числом", exception.getMessage());
-        assertTrue(filmController.findAll().isEmpty());
+        assertTrue(filmController.findAll().getBody().isEmpty());
     }
 
     @Test

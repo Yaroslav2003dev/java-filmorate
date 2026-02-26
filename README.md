@@ -7,7 +7,7 @@
 ### Вывод всех пользователей
 SELECT * FROM User;
 
-### Поиск взаимной дружбы между двумя конкретными пользователями
+### Поиск взаимной дружбы между двумя конкретными пользователями 
 SELECT * FROM FriendRequest fr1
 JOIN FriendRequest fr2 ON fr1.userOne_id=fr2.userTwo_id AND fr1.userTwo_id=fr2.userOne_id
 WHERE fr1.userOne_id=<идентификатор пользователя> AND fr1.userTwo_id=<идентификатор другого пользователя>;
@@ -19,7 +19,7 @@ WHERE fr1.userOne_id=<идентификатор пользователя>) t WH
 JOIN FriendRequest fr2 ON fr1.userOne_id=fr2.userTwo_id AND fr1.userTwo_id=fr2.userOne_id
 WHERE fr1.userOne_id=<идентификатор другого пользователя>);
 
-### Вывод всех фильмов
+### Вывод всех  фильмов
 SELECT * FROM Film;
 
 ### Получение ТОП 10 фильмов по поставленным лайкам

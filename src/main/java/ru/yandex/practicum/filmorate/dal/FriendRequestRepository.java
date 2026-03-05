@@ -36,7 +36,6 @@ public class FriendRequestRepository extends BaseRepository<FriendRequest> imple
     private static final String INSERT_QUERY = "INSERT INTO friend_request (sender_id, receiver_id) VALUES (?, ?)";
 
     private static final String DELETE_QUERY = "DELETE FROM friend_request WHERE sender_id = ? AND receiver_id = ?";
-    ;
 
     public FriendRequestRepository(JdbcTemplate jdbc, RowMapper<FriendRequest> mapper, UserRepository userRepository, IdFriendRowMapper idFriendRowMapper) {
         super(jdbc, mapper);

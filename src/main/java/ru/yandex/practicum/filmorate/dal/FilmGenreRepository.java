@@ -21,12 +21,12 @@ public class FilmGenreRepository extends BaseRepository<Genre> {
     }
 
 
-    public List<Genre> getListIdFilmGenreById(Long film_id) {
-        return jdbc.query(FIND_BY_ID_FILM_QUERY, mapper, film_id);
+    public List<Genre> getListIdFilmGenreById(Long filmId) {
+        return jdbc.query(FIND_BY_ID_FILM_QUERY, mapper, filmId);
     }
 
-    public void save(Long idGenre, Long idFilm) {
-        jdbc.update(INSERT_QUERY, idGenre, idFilm);
+    public void save(Long genreId, Long filmId) {
+        jdbc.update(INSERT_QUERY, genreId, filmId);
     }
 
 }

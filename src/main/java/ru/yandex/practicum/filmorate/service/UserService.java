@@ -3,44 +3,57 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dal.FriendRequestRepository;
+import ru.yandex.practicum.filmorate.dal.UserRepository;
+import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
+import ru.yandex.practicum.filmorate.dto.user.UpdateUserRequest;
+import ru.yandex.practicum.filmorate.dto.user.UserDto;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class UserService {
-    private final UserStorage userStorage;
+    private final UserRepository userRepository;
+    private final FriendRequestRepository friendRequestRepository;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
-        this.userStorage = userStorage;
+    public UserService(UserRepository userRepository, FriendRequestRepository friendRequestRepository) {
+        this.userRepository = userRepository;
+        this.friendRequestRepository = friendRequestRepository;
+    }
+
+    public Collection<UserDto> findAll() {
+        return userRepository.findAll()
+                .stream()
+                .map(UserMapper::mapToUserDto)
+                .collect(Collectors.toList());
     }
 
 
-    public Collection<User> findAll() {
-        return userStorage.findAll();
+    public UserDto create(NewUserRequest request) {
+        validateCreate(request);
+        User user = UserMapper.mapToUser(request);
+        Long id = userRepository.create(user);
+        return UserMapper.mapToUserDto(userRepository.getUserById(id));
     }
 
-
-    public User create(User user) {
-        validateCreate(user);
-        return userStorage.create(user);
-    }
-
-    public User update(User newUser) {
-        User user = userStorage.getUserById(newUser.getId());
-        validateUpdate(user, newUser);
+    public UserDto update(UpdateUserRequest update) {
+        User user = userRepository.getUserById(update.getId());
+        validateUpdate(user, update);
+        User updatedUser = UserMapper.updateUserFields(user, update);
+        userRepository.update(updatedUser);
         log.info("Обновлена информация о пользователе: {}", user);
-        return user;
+        return UserMapper.mapToUserDto(user);
     }
 
-    private void validateCreate(User user) {
+    private void validateCreate(NewUserRequest user) {
         if (user.getEmail() != null && user.getEmail().isBlank()) {
             log.warn("email не может быть пустым");
             throw new ValidationException("email не может быть пустым");
@@ -67,7 +80,7 @@ public class UserService {
         }
     }
 
-    private void validateUpdate(User user, User newUser) {
+    private void validateUpdate(User user, UpdateUserRequest newUser) {
         if (newUser.getEmail() != null && newUser.getEmail().isBlank()) {
             log.warn("email не может быть пустым");
             throw new ValidationException("email не может быть пустым");
@@ -99,26 +112,42 @@ public class UserService {
 
 
     public User getUserById(Long id) {
-        return userStorage.getUserById(id);
+        return userRepository.getUserById(id);
     }
 
-    public User addFriend(Long id, Long friendId) {
-        return userStorage.addFriend(id, friendId);
+    public UserDto addFriend(Long userId, Long friendId) {
+
+        System.out.println("id= " + userId);
+        System.out.println("friendId= " + friendId);
+
+        System.out.println("Началась подписка на " + friendId);
+        friendRequestRepository.addFriend(userId, friendId);
+        System.out.println(userId + " подписан на " + friendId);
+        return UserMapper.mapToUserDto(userRepository.getUserById(friendId));
     }
 
-    public User deleteFriend(Long id, Long friendId) {
-        return userStorage.deleteFriend(id, friendId);
+    public UserDto deleteFriend(Long userId, Long friendId) {
+        userRepository.getUserById(userId);
+        userRepository.getUserById(friendId);
+        friendRequestRepository.deleteFriend(userId, friendId);
+        return UserMapper.mapToUserDto(userRepository.getUserById(friendId));
     }
 
-    public Collection<User> getAllFriends(Long id) {
-        return userStorage.getAllFriends(id);
+    public Collection<UserDto> getAllFriends(Long id) {
+        userRepository.getUserById(id);
+        System.out.println("Ищем друзей юзера с id = " + id);
+        List<Long> idFriends = friendRequestRepository.findAllIdFriends(id);
+        System.out.println("Вот друзья юзера с id = " + id + ": " + idFriends);
+
+        return userRepository.findAllById(friendRequestRepository.findAllIdFriends(id)).stream()
+                .map(UserMapper::mapToUserDto)
+                .collect(Collectors.toList());
     }
 
-    public Collection<User> getCommonFriends(Long id, Long otherId) {
-        Set<User> friendsUser = new HashSet<>(getAllFriends(id));
-        Set<User> friendsOther = new HashSet<>(getAllFriends(otherId));
-        friendsUser.retainAll(friendsOther);
-        return friendsUser;
+    public Collection<UserDto> getCommonFriends(Long id, Long otherId) {
+        return userRepository.findAllById(friendRequestRepository.findIdCommonFriendsById(id, otherId)).stream()
+                .map(UserMapper::mapToUserDto)
+                .collect(Collectors.toList());
     }
 
 }

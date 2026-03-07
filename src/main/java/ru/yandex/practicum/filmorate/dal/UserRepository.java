@@ -47,7 +47,6 @@ public class UserRepository extends BaseRepository<User> implements UserStorage 
 
     public List<User> findAllById(List<Long> usersId) {
         return usersId.stream()
-                .distinct()
                 .map(this::getUserById)
                 .toList();
     }

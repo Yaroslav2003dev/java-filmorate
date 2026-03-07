@@ -43,6 +43,7 @@ public class FilmService {
         validateCreate(newFilmRequest);
         Film film = FilmMapper.mapToFilm(newFilmRequest);
         Long id = filmRepository.create(film);
+        log.info("Создан фильм c id = {}", id);
         return FilmMapper.mapToFilmDto(filmRepository.getFilmById(id));
     }
 
@@ -51,7 +52,7 @@ public class FilmService {
         validateUpdate(film, newFilm);
         Film updatedFilm = FilmMapper.updateFilmFields(film, newFilm);
         filmRepository.update(updatedFilm);
-        log.info("Обновлена информация о фильме: {}", updatedFilm);
+        log.info("Обновлена информация о фильме c id = {}", film.getId());
         return FilmMapper.mapToFilmDto(updatedFilm);
     }
 
@@ -59,6 +60,7 @@ public class FilmService {
         filmRepository.getFilmById(filmId);
         userRepository.getUserById(userId);
         likeFilmRepository.addLike(filmId, userId);
+        log.info("Добавлен лайк фильму c id = {} пользователем c id = {}", filmId, userId);
         return FilmMapper.mapToFilmDto(filmRepository.getFilmById(filmId));
     }
 
@@ -66,6 +68,7 @@ public class FilmService {
         filmRepository.getFilmById(filmId);
         userRepository.getUserById(userId);
         likeFilmRepository.deleteLike(filmId, userId);
+        log.info("Удалён лайк фильму c id = {} пользователем c id = {}", filmId, userId);
         return FilmMapper.mapToFilmDto(filmRepository.getFilmById(filmId));
     }
 

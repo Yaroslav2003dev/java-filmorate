@@ -41,6 +41,7 @@ public class UserService {
         validateCreate(request);
         User user = UserMapper.mapToUser(request);
         Long id = userRepository.create(user);
+        log.info("Создан пользователь с id =: {}", id);
         return UserMapper.mapToUserDto(userRepository.getUserById(id));
     }
 
@@ -49,7 +50,7 @@ public class UserService {
         validateUpdate(user, update);
         User updatedUser = UserMapper.updateUserFields(user, update);
         userRepository.update(updatedUser);
-        log.info("Обновлена информация о пользователе: {}", user);
+        log.info("Обновлена информация о пользователе c id = {}", user.getId());
         return UserMapper.mapToUserDto(user);
     }
 

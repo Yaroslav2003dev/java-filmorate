@@ -51,8 +51,8 @@ public class FriendRequestRepository extends BaseRepository<FriendRequest> imple
         update(DELETE_QUERY, senderId, receiverId);
     }
 
-    public List<Long> findIdCommonFriendsById(Long userId, Long receiverId) {
-        return jdbc.query(FIND_COMMON_FRIENDS_BY_ID_QUERY, idFriendRowMapper, userId, receiverId);
+    public List<Long> findIdCommonFriendsById(Long senderId, Long receiverId) {
+        return jdbc.query(FIND_COMMON_FRIENDS_BY_ID_QUERY, idFriendRowMapper, senderId, receiverId);
     }
 
     @Transactional

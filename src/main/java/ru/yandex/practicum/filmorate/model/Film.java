@@ -6,25 +6,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 
 @Data
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Film implements Comparable<Film> {
+public class Film {
     private Long id;
     private String name;
     private String description;
     private LocalDate releaseDate;
     private Integer duration;
-    private Set<Long> likes = new HashSet<>();
-
-    @Override
-    public int compareTo(Film o) {
-        return likes.size() - o.getLikes().size();
-    }
-
+    private Mpa mpa;
+    private List<Genre> genres;
 }

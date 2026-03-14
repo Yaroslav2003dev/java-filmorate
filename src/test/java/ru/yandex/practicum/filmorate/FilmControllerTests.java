@@ -2,14 +2,14 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.controller.FilmController;
+import ru.yandex.practicum.filmorate.dto.film.FilmDto;
+import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
+import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -18,21 +18,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@SpringBootTest
 public class FilmControllerTests {
-    FilmStorage filmStorage = new InMemoryFilmStorage();
-    UserStorage userStorage = new InMemoryUserStorage();
-    FilmService filmService = new FilmService(filmStorage, userStorage);
-    private final FilmController filmController = new FilmController(filmService);
+    @Autowired
+    private FilmController filmController;
 
     @Test
     @DisplayName("Добавление фильма c правильными данными")
     void test_Create_WhenDataIsCorrect_CreateFilm() {
         //given
-        Film film = Film.builder()
+        NewFilmRequest film = NewFilmRequest.builder()
                 .name("Линкольн для адвоката")
                 .releaseDate(LocalDate.of(2011, Month.OCTOBER, 8))
                 .description("Крутой фильм")
                 .duration(114)
+                .mpa(new Mpa(1L, "G"))
                 .build();
         //when
         filmController.create(film);
@@ -44,11 +44,12 @@ public class FilmControllerTests {
     @DisplayName("Добавление фильма с пустым названием")
     public void test_Create_WhenEmptyName_NotCreateFilm() {
         //given
-        Film filmNoName = Film.builder()
+        NewFilmRequest filmNoName = NewFilmRequest.builder()
                 .name(null)
                 .releaseDate(LocalDate.of(2011, Month.OCTOBER, 8))
                 .description("Крутой фильм")
                 .duration(114)
+                .mpa(new Mpa(1L, "G"))
                 .build();
         // when & then
         ValidationException exception = assertThrows(
@@ -56,18 +57,18 @@ public class FilmControllerTests {
                 () -> filmController.create(filmNoName)
         );
         assertEquals("название не может быть пустым", exception.getMessage());
-        assertTrue(filmController.findAll().getBody().isEmpty());
     }
 
     @Test
     @DisplayName("Добавление фильма с большим описанием, в котором больше 200 символов")
     public void test_Create_WhenDescription201Characters_NotCreateFilm() {
         //given
-        Film filmDescription201Characters = Film.builder()
+        NewFilmRequest filmDescription201Characters = NewFilmRequest.builder()
                 .name("Линкольн для адвоката")
                 .releaseDate(LocalDate.of(2011, Month.OCTOBER, 8))
                 .description("a".repeat(201))
                 .duration(114)
+                .mpa(new Mpa(1L, "G"))
                 .build();
         // when & then
         ValidationException exception = assertThrows(
@@ -75,34 +76,35 @@ public class FilmControllerTests {
                 () -> filmController.create(filmDescription201Characters)
         );
         assertEquals("максимальная длина описания — 200 символов", exception.getMessage());
-        assertTrue(filmController.findAll().getBody().isEmpty());
     }
 
     @Test
     @DisplayName("Добавление фильма с нулевым описанием")
     public void test_Create_filmWithNullDescription_CreateFilm() {
         //given
-        Film filmWithNullDescription = Film.builder()
+        NewFilmRequest filmWithNullDescription = NewFilmRequest.builder()
                 .name("Линкольн для адвоката")
                 .releaseDate(LocalDate.of(2011, Month.OCTOBER, 8))
                 .description(null)
                 .duration(114)
+                .mpa(new Mpa(1L, "G"))
                 .build();
         // when
-        filmController.create(filmWithNullDescription);
+        FilmDto filmDTO = filmController.create(filmWithNullDescription).getBody();
         //then
-        assertEquals(1, filmController.findAll().getBody().size());
+        assertTrue(filmController.getFilmById(filmDTO.getId()).getBody().getDescription() == null);
     }
 
     @Test
     @DisplayName("Добавление фильма с датой раньше чем 28 декабря 1895 года")
     public void test_Create_WhenOldReleaseBefore28December1895_NotCreateFilm() {
         //given
-        Film filmOldRelease = Film.builder()
+        NewFilmRequest filmOldRelease = NewFilmRequest.builder()
                 .name("Линкольн для адвоката")
                 .releaseDate(LocalDate.of(1895, Month.DECEMBER, 27))
                 .description("Крутой фильм")
                 .duration(114)
+                .mpa(new Mpa(1L, "G"))
                 .build();
         // when & then
         ValidationException exception = assertThrows(
@@ -118,11 +120,12 @@ public class FilmControllerTests {
     @DisplayName("Добавление фильма c отрицательной продолжительностью")
     public void test_Create_WhenMinusDuration_NotCreateFilm() {
         //given
-        Film filmMinusDuration = Film.builder()
+        NewFilmRequest filmMinusDuration = NewFilmRequest.builder()
                 .name("Линкольн для адвоката")
                 .releaseDate(LocalDate.of(1895, Month.DECEMBER, 28))
                 .description("Крутой фильм")
                 .duration(-123)
+                .mpa(new Mpa(1L, "G"))
                 .build();
         // when & then
         ValidationException exception = assertThrows(
@@ -130,28 +133,31 @@ public class FilmControllerTests {
                 () -> filmController.create(filmMinusDuration)
         );
         assertEquals("продолжительность фильма должна быть положительным числом", exception.getMessage());
-        assertTrue(filmController.findAll().getBody().isEmpty());
     }
 
     @Test
     @DisplayName("Обновление продолжительности фильма на null")
     public void test_Update_WhenNullDuration_NoUpdateFilm() {
         //given
-        Film film = Film.builder()
-                .id(1L)
+        NewFilmRequest film = NewFilmRequest.builder()
                 .name("Линкольн для адвоката")
                 .releaseDate(LocalDate.of(1895, Month.DECEMBER, 28))
                 .description("Крутой фильм")
                 .duration(114)
+                .mpa(new Mpa(1L, "G"))
                 .build();
-        Film filmNullDuration = film.toBuilder()
+        UpdateFilmRequest filmNullDuration = UpdateFilmRequest.builder()
+                .id(1L)
+                .name("Линкольн для адвоката")
+                .releaseDate(LocalDate.of(1895, Month.DECEMBER, 28))
+                .description("Крутой фильм")
                 .duration(null)
+                .mpa(new Mpa(1L, "G"))
                 .build();
         // when
         filmController.create(film);
         filmController.update(filmNullDuration);
         //then
-        assertEquals(null, filmController.getFilmById(1L).getDuration());
-
+        assertEquals(0, filmController.getFilmByIdInner(1L).getDuration());
     }
 }

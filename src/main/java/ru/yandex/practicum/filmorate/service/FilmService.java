@@ -3,70 +3,87 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dal.*;
+import ru.yandex.practicum.filmorate.dto.film.FilmDto;
+import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
+import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import javax.swing.*;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Collection;
-import java.util.Comparator;
+import java.util.stream.Collectors;
 
 
 @Slf4j
 @Service
 public class FilmService {
-    private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
+    private final FilmRepository filmRepository;
+    private final UserRepository userRepository;
+    private final LikeFilmRepository likeFilmRepository;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
+    public FilmService(FilmRepository filmRepository, UserRepository userRepository, LikeFilmRepository likeFilmRepository) {
+        this.filmRepository = filmRepository;
+        this.userRepository = userRepository;
+        this.likeFilmRepository = likeFilmRepository;
     }
 
-    public Collection<Film> findAll() {
-        return filmStorage.findAll();
+    public Collection<FilmDto> findAll() {
+        return filmRepository.findAll()
+                .stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
     }
 
-    public Film create(Film film) {
-        validateCreate(film);
-        return filmStorage.create(film);
+    public FilmDto create(NewFilmRequest newFilmRequest) {
+        validateCreate(newFilmRequest);
+        Film film = FilmMapper.mapToFilm(newFilmRequest);
+        Long id = filmRepository.create(film);
+        log.info("Создан фильм c id = {}", id);
+        return FilmMapper.mapToFilmDto(filmRepository.getFilmById(id));
     }
 
-    public Film update(Film newFilm) {
-        Film film = filmStorage.getFilmById(newFilm.getId());
+    public FilmDto update(UpdateFilmRequest newFilm) {
+        Film film = filmRepository.getFilmById(newFilm.getId());
         validateUpdate(film, newFilm);
-        log.info("Обновлена информация о фильме: {}", film);
-        return film;
+        Film updatedFilm = FilmMapper.updateFilmFields(film, newFilm);
+        filmRepository.update(updatedFilm);
+        log.info("Обновлена информация о фильме c id = {}", film.getId());
+        return FilmMapper.mapToFilmDto(updatedFilm);
     }
 
-    public Film addLike(Long id, Long userId) {
-        filmStorage.getFilmById(id);
-        userStorage.getUserById(userId);
-        return filmStorage.addLike(id, userId);
+    public FilmDto addLike(Long filmId, Long userId) {
+        filmRepository.getFilmById(filmId);
+        userRepository.getUserById(userId);
+        likeFilmRepository.addLike(filmId, userId);
+        log.info("Добавлен лайк фильму c id = {} пользователем c id = {}", filmId, userId);
+        return FilmMapper.mapToFilmDto(filmRepository.getFilmById(filmId));
     }
 
-    public Film deleteLike(Long id, Long userId) {
-        filmStorage.getFilmById(id);
-        userStorage.getUserById(userId);
-        return filmStorage.deleteLike(id, userId);
+    public FilmDto deleteLike(Long filmId, Long userId) {
+        filmRepository.getFilmById(filmId);
+        userRepository.getUserById(userId);
+        likeFilmRepository.deleteLike(filmId, userId);
+        log.info("Удалён лайк фильму c id = {} пользователем c id = {}", filmId, userId);
+        return FilmMapper.mapToFilmDto(filmRepository.getFilmById(filmId));
     }
 
-    public Film getFilmById(Long id) {
-        return filmStorage.getFilmById(id);
+    public FilmDto getFilmById(Long filmId) {
+        return FilmMapper.mapToFilmDto(filmRepository.getFilmById(filmId));
     }
 
-    public Collection<Film> getTopFilms(Integer count) {
-        return filmStorage.findAll().stream()
-                .sorted(Comparator.reverseOrder())
-                .limit(count)
-                .toList();
+    public Collection<FilmDto> getTopFilms(Integer count) {
+        return likeFilmRepository.topFilms(count)
+                .stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
     }
 
-    private void validateUpdate(Film film, Film newFilm) {
+    private void validateUpdate(Film film, UpdateFilmRequest newFilm) {
         if (newFilm.getName() != null && newFilm.getName().isBlank()) {
             log.warn("название не может быть пустым");
             throw new ValidationException("название не может быть пустым");
@@ -96,7 +113,7 @@ public class FilmService {
         }
     }
 
-    private void validateCreate(Film film) {
+    private void validateCreate(NewFilmRequest film) {
         if (film.getName() == null || film.getName().isBlank()) {
             log.warn("название не может быть пустым");
             throw new ValidationException("название не может быть пустым");

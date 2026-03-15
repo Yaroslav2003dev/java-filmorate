@@ -24,12 +24,15 @@ public class FilmService {
     private final FilmRepository filmRepository;
     private final UserRepository userRepository;
     private final LikeFilmRepository likeFilmRepository;
+    private final GenreRepository genreRepository;
 
     @Autowired
-    public FilmService(FilmRepository filmRepository, UserRepository userRepository, LikeFilmRepository likeFilmRepository) {
+    public FilmService(FilmRepository filmRepository, UserRepository userRepository, LikeFilmRepository likeFilmRepository,
+                       GenreRepository genreRepository) {
         this.filmRepository = filmRepository;
         this.userRepository = userRepository;
         this.likeFilmRepository = likeFilmRepository;
+        this.genreRepository = genreRepository;
     }
 
     public Collection<FilmDto> findAll() {
@@ -78,6 +81,21 @@ public class FilmService {
 
     public Collection<FilmDto> getTopFilms(Integer count) {
         return likeFilmRepository.topFilms(count)
+                .stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
+    }
+
+    public Collection<FilmDto> getPopularFilmByGenreAndYear(int yearStart, int yearEnd, int genreId, int count) {
+        if (yearStart > LocalDate.now().getYear() || yearEnd > LocalDate.now().getYear() || yearEnd < yearStart) {
+            throw new ValidationException("Некорректно указаны год фильма");
+        }
+
+        LocalDate localDateStart = LocalDate.of(yearStart, 1, 1);
+        LocalDate localDateEnd = LocalDate.of(yearEnd, 12, 31);
+
+        genreRepository.findById(genreId);
+        return likeFilmRepository.popularFilmByYearAndGenre(genreId, localDateStart, localDateEnd, count)
                 .stream()
                 .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList());

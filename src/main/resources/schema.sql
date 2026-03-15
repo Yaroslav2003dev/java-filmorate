@@ -66,3 +66,10 @@ CREATE TABLE IF NOT EXISTS friend_request (
     CONSTRAINT fk_friend_sender FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_friend_receiver FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS film_reviews (
+    user_id BIGINT NOT NULL REFERENCES users(id),
+    film_id BIGINT NOT NULL REFERENCES film(id),
+    review VARCHAR(1000),
+    PRIMARY KEY(user_id, film_id)
+);

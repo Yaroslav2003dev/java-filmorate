@@ -60,6 +60,14 @@ public class FilmController {
         return new ResponseEntity<>(filmService.getFilmById(id), HttpStatus.OK);
     }
 
+    @GetMapping("/popular/genre/{genreId}/between/{yearStart}/and/{yearEnd}")
+    public ResponseEntity<Collection<FilmDto>> getPopularFilmsByGenreYear(@PathVariable Integer genreId,
+                                                                          @PathVariable Integer yearStart,
+                                                                          @PathVariable Integer yearEnd,
+                                                                          @RequestParam(defaultValue = "10") Integer count) {
+        return new ResponseEntity<>(filmService.getPopularFilmByGenreAndYear(yearStart, yearEnd, genreId, count), HttpStatus.OK);
+    }
+
     public FilmDto getFilmByIdInner(Long id) {
         return filmService.getFilmById(id);
     }

@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.LikeStorage;
 
 import java.util.Collection;
+import java.util.List;
 
 @Repository
 public class LikeFilmRepository extends BaseRepository<Film> implements LikeStorage {
@@ -20,6 +21,31 @@ public class LikeFilmRepository extends BaseRepository<Film> implements LikeStor
     private static final String INSERT_QUERY = "INSERT INTO like_film(film_id, user_id)" +
             "VALUES (?, ?)";
     private static final String DELETE_QUERY = "DELETE FROM like_film WHERE film_id = ? AND user_id = ?";
+    private static final String SORT_FILM_BY_GENRE_YEAR_LIMIT_QUERY =
+            "SELECT f.id, f.name, f.mpa_id, f.description, f.release_date, f.duration " +
+                    "FROM LIKE_FILM lf " +
+                    "JOIN FILM f ON lf.FILM_ID = f.ID " +
+                    "JOIN FILMGENRE f2 ON f.ID  = f2.FILM_ID " +
+                    "WHERE f2.GENRE_ID = ? AND YEAR(f.RELEASE_DATE ) = ? " +
+                    "GROUP BY f.id, f.name, f.mpa_id, f.description, f.release_date, f.duration " +
+                    "ORDER BY COUNT(lf.USER_ID ) DESC ";
+    private static final String SORT_FILM_BY_GENRE_LIMIT_QUERY =
+            "SELECT f.id, f.name, f.mpa_id, f.description, f.release_date, f.duration " +
+                    "FROM LIKE_FILM lf " +
+                    "JOIN FILM f ON lf.FILM_ID = f.ID " +
+                    "JOIN FILMGENRE f2 ON f.ID  = f2.FILM_ID " +
+                    "WHERE f2.GENRE_ID = ? " +
+                    "GROUP BY f.id, f.name, f.mpa_id, f.description, f.release_date, f.duration " +
+                    "ORDER BY COUNT(lf.USER_ID ) DESC ";
+    private static final String SORT_FILM_BY_YEAR_LIMIT_QUERY =
+            "SELECT f.id, f.name, f.mpa_id, f.description, f.release_date, f.duration " +
+                    "FROM LIKE_FILM lf " +
+                    "JOIN FILM f ON lf.FILM_ID = f.ID " +
+                    "JOIN FILMGENRE f2 ON f.ID  = f2.FILM_ID " +
+                    "WHERE YEAR(f.RELEASE_DATE ) = ? " +
+                    "GROUP BY f.id, f.name, f.mpa_id, f.description, f.release_date, f.duration " +
+                    "ORDER BY COUNT(lf.USER_ID ) DESC ";
+
 
     public LikeFilmRepository(JdbcTemplate jdbc, RowMapper<Film> mapper) {
         super(jdbc, mapper);
@@ -27,6 +53,17 @@ public class LikeFilmRepository extends BaseRepository<Film> implements LikeStor
 
     public Collection<Film> topFilms(int limit) {
         return jdbc.query(SORT_FILM_DESC_LIMIT_QUERY, mapper, limit);
+    }
+
+    public List<Film> mostPopularsFilms(Long genreId, Integer year) {
+        if (year == null) {
+            return jdbc.query(SORT_FILM_BY_GENRE_LIMIT_QUERY, mapper, genreId);
+        }
+        if (genreId == null) {
+            return jdbc.query(SORT_FILM_BY_YEAR_LIMIT_QUERY, mapper, year);
+        }
+
+        return jdbc.query(SORT_FILM_BY_GENRE_YEAR_LIMIT_QUERY, mapper, genreId, year);
     }
 
     @Override

@@ -15,6 +15,7 @@ import javax.swing.*;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 
@@ -81,6 +82,13 @@ public class FilmService {
                 .stream()
                 .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList());
+    }
+
+    public List<FilmDto> getMostPopularsFilmByGenreAndYear(Long genreId, Integer year) {
+        return likeFilmRepository.mostPopularsFilms(genreId, year)
+                .stream()
+                .map(FilmMapper::mapToFilmDto)
+                .toList();
     }
 
     private void validateUpdate(Film film, UpdateFilmRequest newFilm) {

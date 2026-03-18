@@ -51,8 +51,20 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public ResponseEntity<Collection<FilmDto>> getTopFilms(@RequestParam(defaultValue = "10") Integer count) {
-        return new ResponseEntity<>(filmService.getTopFilms(count), HttpStatus.OK);
+    public ResponseEntity<Collection<FilmDto>> getTopFilms(
+            @RequestParam(required = false) Integer count,
+            @RequestParam(required = false) Long genreId,
+            @RequestParam(required = false) Integer year) {
+
+        if (genreId == null && year == null) {
+            if (count == null) {
+                count = 10;
+            }
+            return ResponseEntity.ok(filmService.getTopFilms(count));
+        } else {
+            return ResponseEntity.ok(
+                    filmService.getMostPopularsFilmByGenreAndYear(genreId, year));
+        }
     }
 
     @GetMapping("/{id}")

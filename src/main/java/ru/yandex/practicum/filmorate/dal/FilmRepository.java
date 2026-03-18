@@ -20,6 +20,12 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
     private static final String INSERT_QUERY = "INSERT INTO film(name, mpa_id, description, release_date, duration)" +
             "VALUES (?,?,?, ?, ?)";
     private static final String UPDATE_QUERY = "UPDATE film SET name = ?, description = ?, duration = ?, mpa_id=?, release_date = ? WHERE id = ?";
+    private static final String FIND_COMMON_FILMS_QUERY =
+            "SELECT f.* FROM film f " +
+                    "WHERE f.id IN (SELECT l1.film_id FROM like_film l1 " +
+                    "JOIN like_film l2 ON l1.film_id = l2.film_id " +
+                    "WHERE l1.user_id = ? AND l2.user_id = ?) " +
+                    "ORDER BY (SELECT COUNT(*) FROM like_film WHERE film_id = f.id) DESC, f.id";
 
     public FilmRepository(JdbcTemplate jdbc, RowMapper<Film> mapper, FilmGenreRepository filmGenreRepository, GenreRepository genreRepository, MpaRepository mpaRepository) {
         super(jdbc, mapper);
@@ -55,6 +61,10 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
 
     public List<Film> findAll() {
         return findMany(FIND_ALL_QUERY);
+    }
+
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        return findMany(FIND_COMMON_FILMS_QUERY, userId, friendId);
     }
 
 

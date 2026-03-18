@@ -67,6 +67,11 @@ public class FilmController {
         }
     }
 
+    @GetMapping("/common")
+    public ResponseEntity<Collection<FilmDto>> getCommonFilms(@RequestParam Long userId, @RequestParam Long friendId) {
+        return new ResponseEntity<>(filmService.getCommonFilms(userId, friendId), HttpStatus.OK);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<FilmDto> getFilmById(@PathVariable Long id) {
         return new ResponseEntity<>(filmService.getFilmById(id), HttpStatus.OK);

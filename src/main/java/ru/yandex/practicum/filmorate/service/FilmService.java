@@ -88,11 +88,21 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 
+
     public List<FilmDto> getMostPopularsFilmByGenreAndYear(Long genreId, Integer year) {
         return likeFilmRepository.mostPopularsFilms(genreId, year)
                 .stream()
                 .map(FilmMapper::mapToFilmDto)
                 .toList();
+    }
+
+    public Collection<FilmDto> getCommonFilms(Long userId, Long friendId) {
+
+        return filmRepository.getCommonFilms(userId, friendId)
+                .stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
+
     }
 
     private void validateUpdate(Film film, UpdateFilmRequest newFilm) {

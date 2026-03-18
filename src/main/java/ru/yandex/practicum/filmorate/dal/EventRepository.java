@@ -30,14 +30,14 @@ public class EventRepository extends BaseRepository<Event> implements EventStora
     }
 
     @Override
-    public Long create(Long event_timestamp, Long user_id, EventType event_type, Operation operation, Long entity_id) {
+    public Long create(Long eventTimestamp, Long userId, EventType event_type, Operation operation, Long entityId) {
         return insert(
                 INSERT_QUERY,
-                event_timestamp,
-                user_id,
+                eventTimestamp,
+                userId,
                 event_type.name(),
                 operation.name(),
-                entity_id
+                entityId
         );
     }
 

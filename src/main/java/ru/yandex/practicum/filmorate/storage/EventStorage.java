@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface EventStorage {
     Collection<Event> getEventsByUserId(Long id);
 
-    Long create(Long event_timestamp, Long user_id, EventType event_type, Operation operation, Long entity_id);
+    Long create(Long eventTimestamp, Long userId, EventType eventType, Operation operation, Long entityId);
 
     Event getEventById(Long id);
 }

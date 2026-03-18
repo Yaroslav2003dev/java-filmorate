@@ -5,7 +5,6 @@ import ru.yandex.practicum.filmorate.service.EventType;
 import ru.yandex.practicum.filmorate.service.Operation;
 
 import java.util.Collection;
-import java.util.Optional;
 
 public interface EventStorage {
     Collection<Event> getEventsByUserId(Long id);

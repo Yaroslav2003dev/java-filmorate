@@ -25,12 +25,14 @@ public class FilmService {
     private final FilmRepository filmRepository;
     private final UserRepository userRepository;
     private final LikeFilmRepository likeFilmRepository;
+    private final EventService eventService;
 
     @Autowired
-    public FilmService(FilmRepository filmRepository, UserRepository userRepository, LikeFilmRepository likeFilmRepository) {
+    public FilmService(FilmRepository filmRepository, UserRepository userRepository, LikeFilmRepository likeFilmRepository, EventService eventService) {
         this.filmRepository = filmRepository;
         this.userRepository = userRepository;
         this.likeFilmRepository = likeFilmRepository;
+        this.eventService = eventService;
     }
 
     public Collection<FilmDto> findAll() {
@@ -61,6 +63,7 @@ public class FilmService {
         filmRepository.getFilmById(filmId);
         userRepository.getUserById(userId);
         likeFilmRepository.addLike(filmId, userId);
+        eventService.createEvent(userId, EventType.LIKE, Operation.ADD, filmId);
         log.info("Добавлен лайк фильму c id = {} пользователем c id = {}", filmId, userId);
         return FilmMapper.mapToFilmDto(filmRepository.getFilmById(filmId));
     }
@@ -69,6 +72,7 @@ public class FilmService {
         filmRepository.getFilmById(filmId);
         userRepository.getUserById(userId);
         likeFilmRepository.deleteLike(filmId, userId);
+        eventService.createEvent(userId, EventType.LIKE, Operation.REMOVE, filmId);
         log.info("Удалён лайк фильму c id = {} пользователем c id = {}", filmId, userId);
         return FilmMapper.mapToFilmDto(filmRepository.getFilmById(filmId));
     }

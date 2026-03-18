@@ -66,6 +66,19 @@ CREATE TABLE IF NOT EXISTS friend_request (
     CONSTRAINT fk_friend_sender FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_friend_receiver FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
 );
+CREATE TABLE IF NOT EXISTS Event (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    event_timestamp BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    event_type VARCHAR(20) NOT NULL,
+    operation VARCHAR(20) NOT NULL,
+    entity_id BIGINT NOT NULL,
+
+    CONSTRAINT fk_event_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+);
 
 CREATE TABLE IF NOT EXISTS review (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,

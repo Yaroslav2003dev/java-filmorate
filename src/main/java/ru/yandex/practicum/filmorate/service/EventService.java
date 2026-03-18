@@ -35,8 +35,8 @@ public class EventService {
     }
 
     public EventDto createEvent(Long userId, EventType eventType, Operation operation, Long entityId) {
-        Long event_timestamp = Instant.now().toEpochMilli();
-        Long eventId = eventStorage.create(event_timestamp, userId, eventType, operation, entityId);
+        Long eventTimestamp = Instant.now().toEpochMilli();
+        Long eventId = eventStorage.create(eventTimestamp, userId, eventType, operation, entityId);
         return EventMapper.mapToEventDto(eventStorage.getEventById(eventId));
     }
 }

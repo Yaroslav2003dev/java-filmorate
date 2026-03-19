@@ -55,6 +55,22 @@ public class UserService {
         return UserMapper.mapToUserDto(user);
     }
 
+    public UserDto delete(Long id) {
+        User user = userRepository.getUserById(id);
+        userRepository.delete(id);
+        log.info("Удалён пользователь c id = {}", id);
+        return UserMapper.mapToUserDto(user);
+    }
+
+    public UserDto getUserById(Long id) {
+        User user = userRepository.getUserById(id);
+        return UserMapper.mapToUserDto(user);
+    }
+
+    public User getUserByIdForTest(Long id) {
+        return userRepository.getUserById(id);
+    }
+
     private void validateCreate(NewUserRequest user) {
         if (user.getEmail() != null && user.getEmail().isBlank()) {
             log.warn("email не может быть пустым");
@@ -112,10 +128,6 @@ public class UserService {
         }
     }
 
-
-    public User getUserById(Long id) {
-        return userRepository.getUserById(id);
-    }
 
     public UserDto addFriend(Long userId, Long friendId) {
         friendRequestRepository.addFriend(userId, friendId);

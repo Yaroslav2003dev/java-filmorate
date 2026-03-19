@@ -13,7 +13,7 @@ import java.util.List;
 public class LikeFilmRepository extends BaseRepository<Film> implements LikeStorage {
     private static final String SORT_FILM_DESC_LIMIT_QUERY = "SELECT f.id, f.name, mpa_id, f.description, f.release_date, f.duration\n" +
             "FROM like_film lf\n" +
-            "JOIN Film f ON lf.film_id = f.id\n" +
+            "RIGHT JOIN Film f ON lf.film_id = f.id\n" +
             "GROUP BY f.id, f.name, mpa_id, f.description, f.release_date, f.duration\n" +
             "ORDER BY COUNT(lf.user_id) DESC\n" +
             "LIMIT ?";

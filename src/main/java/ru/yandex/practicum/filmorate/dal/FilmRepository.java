@@ -26,6 +26,7 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
                     "JOIN like_film l2 ON l1.film_id = l2.film_id " +
                     "WHERE l1.user_id = ? AND l2.user_id = ?) " +
                     "ORDER BY (SELECT COUNT(*) FROM like_film WHERE film_id = f.id) DESC, f.id";
+    private static final String DELETE_QUERY = "DELETE FROM film WHERE id = ?";
 
     public FilmRepository(JdbcTemplate jdbc, RowMapper<Film> mapper, FilmGenreRepository filmGenreRepository, GenreRepository genreRepository, MpaRepository mpaRepository) {
         super(jdbc, mapper);
@@ -87,6 +88,10 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
                 film.getReleaseDate(),
                 film.getId()
         );
+    }
+
+    public void delete(Long id) {
+        update(DELETE_QUERY, id);
     }
 
 }

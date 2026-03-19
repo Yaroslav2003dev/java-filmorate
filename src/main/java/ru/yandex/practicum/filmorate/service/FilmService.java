@@ -59,6 +59,13 @@ public class FilmService {
         return FilmMapper.mapToFilmDto(updatedFilm);
     }
 
+    public FilmDto delete(Long id) {
+        Film film = filmRepository.getFilmById(id);
+        filmRepository.delete(id);
+        log.info("Удалён фильм c id = {}", id);
+        return FilmMapper.mapToFilmDto(film);
+    }
+
     public FilmDto addLike(Long filmId, Long userId) {
         filmRepository.getFilmById(filmId);
         userRepository.getUserById(userId);

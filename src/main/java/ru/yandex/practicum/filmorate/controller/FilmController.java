@@ -40,6 +40,11 @@ public class FilmController {
         return new ResponseEntity<>(filmService.update(updateFilmRequest), HttpStatus.OK);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<FilmDto> update(@PathVariable Long id) {
+        return new ResponseEntity<>(filmService.delete(id), HttpStatus.OK);
+    }
+
     @PutMapping("/{id}/like/{userId}")
     public ResponseEntity<FilmDto> addLike(@PathVariable Long id, @PathVariable Long userId) {
         return new ResponseEntity<>(filmService.addLike(id, userId), HttpStatus.OK);

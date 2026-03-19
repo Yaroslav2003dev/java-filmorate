@@ -69,8 +69,19 @@ public class UserController {
         return new ResponseEntity<>(eventService.getEventsByUserId(userid), HttpStatus.OK);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<UserDto> deleteByUserId(@PathVariable Long id) {
+        return new ResponseEntity<>(userService.delete(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDto> getUserByUserId(@PathVariable Long id) {
+        return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
+    }
+
+
     public User getUserById(Long id) {
-        return userService.getUserById(id);
+        return userService.getUserByIdForTest(id);
     }
 }
 

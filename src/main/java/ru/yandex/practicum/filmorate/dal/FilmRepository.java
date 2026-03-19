@@ -23,6 +23,7 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
     private static final String INSERT_QUERY = "INSERT INTO film(name, mpa_id, description, release_date, duration)" +
             "VALUES (?,?,?, ?, ?)";
     private static final String UPDATE_QUERY = "UPDATE film SET name = ?, description = ?, duration = ?, mpa_id=?, release_date = ? WHERE id = ?";
+    private static final String SEARCH_ORDER_BY = " GROUP BY f.id ORDER BY COUNT(l.user_id) DESC";
     private static final String FIND_COMMON_FILMS_QUERY =
             "SELECT f.* FROM film f " +
                     "WHERE f.id IN (SELECT l1.film_id FROM like_film l1 " +
@@ -134,6 +135,39 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
         }
     }
 
+    public List<Film> search(String query, List<String> by) {
+        String searchPattern = "%" + query.toLowerCase() + "%";
+
+        StringBuilder sql = new StringBuilder(
+                        "SELECT f.* FROM film f " +
+                        "LEFT JOIN like_film l ON f.id = l.film_id "
+        );
+
+        List<Object> params = new ArrayList<>();
+
+        if (by.contains("director")) {
+            sql.append("LEFT JOIN film_director fd ON f.id = fd.film_id ");
+            sql.append("LEFT JOIN director d ON fd.director_id = d.id ");
+        }
+
+        sql.append("WHERE ");
+
+        if (by.contains("title") && by.contains("director")) {
+            sql.append("(LOWER(f.name) LIKE ? OR LOWER(d.name) LIKE ?) ");
+            params.add(searchPattern);
+            params.add(searchPattern);
+        } else if (by.contains("director")) {
+            sql.append("LOWER(d.name) LIKE ? ");
+            params.add(searchPattern);
+        } else {
+            sql.append("LOWER(f.name) LIKE ? ");
+            params.add(searchPattern);
+        }
+
+        sql.append(SEARCH_ORDER_BY);
+
+        return findMany(sql.toString(), params.toArray());
+    }
     public void delete(Long id) {
         update(DELETE_QUERY, id);
     }

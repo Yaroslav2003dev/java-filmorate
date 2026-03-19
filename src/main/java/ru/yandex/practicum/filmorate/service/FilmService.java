@@ -98,6 +98,14 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 
+    public Collection<FilmDto> search(String query, List<String> by) {
+        log.info("Поиск фильмов по запросу:  {} (критерии: {}", query, by);
+        List<Film> films = filmRepository.search(query, by);
+        return films.stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
+    }
+
 
     public List<FilmDto> getMostPopularsFilmByGenreAndYear(Long genreId, Integer year) {
         return likeFilmRepository.mostPopularsFilms(genreId, year)

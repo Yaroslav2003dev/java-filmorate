@@ -82,6 +82,12 @@ public class FilmController {
         return new ResponseEntity<>(filmService.getFilmById(id), HttpStatus.OK);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<Collection<FilmDto>> search(@RequestParam("query") String query,
+                                                      @RequestParam("by") List<String> by) {
+        return new ResponseEntity<>(filmService.search(query, by), HttpStatus.OK);
+    }
+
     @GetMapping("/director/{directorId}")
     public ResponseEntity<Collection<FilmDto>> getFilmsByDirector(@PathVariable Long directorId,
                                                                   @RequestParam String sortBy) {

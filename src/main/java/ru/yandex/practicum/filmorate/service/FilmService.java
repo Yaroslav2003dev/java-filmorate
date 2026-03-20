@@ -9,9 +9,9 @@ import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import javax.swing.*;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Collection;
@@ -26,13 +26,16 @@ public class FilmService {
     private final UserRepository userRepository;
     private final LikeFilmRepository likeFilmRepository;
     private final EventService eventService;
+    private final DirectorRepository directorRepository;
+
 
     @Autowired
-    public FilmService(FilmRepository filmRepository, UserRepository userRepository, LikeFilmRepository likeFilmRepository, EventService eventService) {
+    public FilmService(FilmRepository filmRepository, UserRepository userRepository, LikeFilmRepository likeFilmRepository, EventService eventService, DirectorRepository directorRepository) {
         this.filmRepository = filmRepository;
         this.userRepository = userRepository;
         this.likeFilmRepository = likeFilmRepository;
         this.eventService = eventService;
+        this.directorRepository = directorRepository;
     }
 
     public Collection<FilmDto> findAll() {
@@ -112,6 +115,23 @@ public class FilmService {
 
     }
 
+    public Collection<FilmDto> getFilmsByDirector(Long directorId, String sortBy) {
+
+        directorRepository.getDirectorById(directorId);
+
+
+        if (sortBy == null || (!sortBy.equalsIgnoreCase("year") && !sortBy.equalsIgnoreCase("likes"))) {
+            throw new ValidationException("Неверный параметр сортировки. Допустимые значения: year, likes");
+        }
+
+        List<Film> films = filmRepository.getFilmsByDirector(directorId, sortBy);
+        log.info("Получено {} фильмов режиссера с id = {}, сортировка по {}", films.size(), directorId, sortBy);
+
+        return films.stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
+    }
+
     private void validateUpdate(Film film, UpdateFilmRequest newFilm) {
         if (newFilm.getName() != null && newFilm.getName().isBlank()) {
             log.warn("название не может быть пустым");
@@ -139,6 +159,11 @@ public class FilmService {
             throw new ValidationException("продолжительность фильма должна быть положительным числом");
         } else {
             film.setDuration(newFilm.getDuration());
+        }
+        if (newFilm.getDirectors() != null && !newFilm.getDirectors().isEmpty()) {
+            for (Director director : newFilm.getDirectors()) {
+                directorRepository.getDirectorById(director.getId());
+            }
         }
     }
 

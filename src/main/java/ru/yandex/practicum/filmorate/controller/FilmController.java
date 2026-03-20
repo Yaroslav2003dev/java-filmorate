@@ -82,6 +82,12 @@ public class FilmController {
         return new ResponseEntity<>(filmService.getFilmById(id), HttpStatus.OK);
     }
 
+    @GetMapping("/director/{directorId}")
+    public ResponseEntity<Collection<FilmDto>> getFilmsByDirector(@PathVariable Long directorId,
+                                                                  @RequestParam String sortBy) {
+        return new ResponseEntity<>(filmService.getFilmsByDirector(directorId, sortBy), HttpStatus.OK);
+    }
+
     public FilmDto getFilmByIdInner(Long id) {
         return filmService.getFilmById(id);
     }

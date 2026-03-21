@@ -168,6 +168,7 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
 
         return findMany(sql.toString(), params.toArray());
     }
+
     public void delete(Long id) {
         update(DELETE_QUERY, id);
     }

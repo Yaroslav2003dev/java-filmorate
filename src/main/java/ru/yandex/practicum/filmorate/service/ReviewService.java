@@ -69,6 +69,7 @@ public class ReviewService {
                 .map(ReviewMapper::toDto)
                 .collect(Collectors.toList());
     }
+
     public boolean addLike(Long reviewId, Long userId) {
         reviewStorage.getReviewById(reviewId).orElseThrow(
                 () -> new NotFoundException("Отзыв с id " + reviewId + " не найден"));

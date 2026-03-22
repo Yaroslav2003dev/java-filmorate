@@ -46,6 +46,19 @@ public class LikeFilmRepository extends BaseRepository<Film> implements LikeStor
                     "GROUP BY f.id, f.name, f.mpa_id, f.description, f.release_date, f.duration " +
                     "ORDER BY COUNT(lf.USER_ID ) DESC ";
 
+    private static final String GET_RECOMMENDATIONS_QUERY = "SELECT film_id FROM like_film " +
+            "WHERE user_id = (" +
+            "    SELECT other.user_id " +
+            "    FROM like_film target " +
+            "    JOIN like_film other ON target.film_id = other.film_id AND target.user_id != other.user_id " +
+            "    WHERE target.user_id = ? " +
+            "    GROUP BY other.user_id " +
+            "    ORDER BY COUNT(other.film_id) DESC " +
+            "    LIMIT 1" +
+            ") " +
+            "AND film_id NOT IN (" +
+            "    SELECT film_id FROM like_film WHERE user_id = ? " +
+            ")";
 
     public LikeFilmRepository(JdbcTemplate jdbc, RowMapper<Film> mapper) {
         super(jdbc, mapper);
@@ -78,5 +91,9 @@ public class LikeFilmRepository extends BaseRepository<Film> implements LikeStor
                 filmId,
                 userId
         );
+    }
+
+    public List<Long> getRecommendedFilmsIds(Long userId) {
+        return jdbc.queryForList(GET_RECOMMENDATIONS_QUERY, Long.class, userId, userId);
     }
 }

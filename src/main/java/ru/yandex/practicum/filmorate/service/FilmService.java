@@ -147,6 +147,16 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 
+    public Collection<FilmDto> getRecommendations(Long userId) {
+        userRepository.getUserById(userId);
+
+        log.info("Запрос рекомендация для пользователя с id = {}", userId);
+
+        List<Long> recommendedIds = likeFilmRepository.getRecommendedFilmsIds(userId);
+
+
+    }
+
     private void validateUpdate(Film film, UpdateFilmRequest newFilm) {
         if (newFilm.getName() != null && newFilm.getName().isBlank()) {
             log.warn("название не может быть пустым");

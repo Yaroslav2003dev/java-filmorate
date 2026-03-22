@@ -20,6 +20,7 @@ public class LikeFilmRepository extends BaseRepository<Film> implements LikeStor
 
     private static final String INSERT_QUERY = "INSERT INTO like_film(film_id, user_id)" +
             "VALUES (?, ?)";
+    private static final String FIND_BY_FILM_AND_USER = "SELECT f.id, f.name, f.mpa_id, f.description, f.release_date, f.duration FROM like_film lf JOIN Film f ON lf.film_id = f.id WHERE film_id=? AND user_id=?";
     private static final String DELETE_QUERY = "DELETE FROM like_film WHERE film_id = ? AND user_id = ?";
     private static final String SORT_FILM_BY_GENRE_YEAR_LIMIT_QUERY =
             "SELECT f.id, f.name, f.mpa_id, f.description, f.release_date, f.duration " +
@@ -81,7 +82,9 @@ public class LikeFilmRepository extends BaseRepository<Film> implements LikeStor
 
     @Override
     public void addLike(Long filmId, Long userId) {
-        jdbc.update(INSERT_QUERY, filmId, userId);
+        if (jdbc.query(FIND_BY_FILM_AND_USER, mapper, filmId, userId).isEmpty()) {
+            jdbc.update(INSERT_QUERY, filmId, userId);
+        }
     }
 
     @Override

@@ -76,7 +76,6 @@ public class ReviewService {
                 () -> new NotFoundException("Отзыв с id " + reviewId + " не найден"));
         userStorage.getUserById(userId);
         reviewStorage.addLike(reviewId, userId);
-        eventService.createEvent(userId, EventType.LIKE, Operation.ADD, reviewId);
         return true;
     }
 
@@ -85,7 +84,6 @@ public class ReviewService {
                 () -> new NotFoundException("Отзыв с id " + reviewId + " не найден"));
         userStorage.getUserById(userId);
         reviewStorage.addDislike(reviewId, userId);
-        eventService.createEvent(userId, EventType.LIKE, Operation.ADD, reviewId);
         return true;
     }
 
@@ -94,7 +92,6 @@ public class ReviewService {
                 () -> new NotFoundException("Отзыв с id " + reviewId + " не найден"));
         userStorage.getUserById(userId);
         reviewStorage.removeLike(reviewId, userId);
-        eventService.createEvent(userId, EventType.LIKE, Operation.REMOVE, reviewId);
         return true;
     }
 
@@ -103,7 +100,6 @@ public class ReviewService {
                 () -> new NotFoundException("Отзыв с id " + reviewId + " не найден"));
         userStorage.getUserById(userId);
         reviewStorage.removeDislike(reviewId, userId);
-        eventService.createEvent(userId, EventType.LIKE, Operation.REMOVE, reviewId);
         return true;
     }
 }

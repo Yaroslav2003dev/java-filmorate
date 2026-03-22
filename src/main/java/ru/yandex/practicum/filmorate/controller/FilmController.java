@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 
 
 import java.util.Collection;
+import java.util.List;
 
 
 @Slf4j
@@ -80,6 +81,12 @@ public class FilmController {
     @GetMapping("/{id}")
     public ResponseEntity<FilmDto> getFilmById(@PathVariable Long id) {
         return new ResponseEntity<>(filmService.getFilmById(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Collection<FilmDto>> search(@RequestParam("query") String query,
+                                                      @RequestParam("by") List<String> by) {
+        return new ResponseEntity<>(filmService.search(query, by), HttpStatus.OK);
     }
 
     @GetMapping("/director/{directorId}")

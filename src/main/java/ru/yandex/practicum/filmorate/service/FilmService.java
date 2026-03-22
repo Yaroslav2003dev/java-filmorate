@@ -27,15 +27,17 @@ public class FilmService {
     private final LikeFilmRepository likeFilmRepository;
     private final EventService eventService;
     private final DirectorRepository directorRepository;
+    private final FilmDirectorRepository filmDirectorRepository;
 
 
     @Autowired
-    public FilmService(FilmRepository filmRepository, UserRepository userRepository, LikeFilmRepository likeFilmRepository, EventService eventService, DirectorRepository directorRepository) {
+    public FilmService(FilmRepository filmRepository, UserRepository userRepository, LikeFilmRepository likeFilmRepository, EventService eventService, DirectorRepository directorRepository, FilmDirectorRepository filmDirectorRepository) {
         this.filmRepository = filmRepository;
         this.userRepository = userRepository;
         this.likeFilmRepository = likeFilmRepository;
         this.eventService = eventService;
         this.directorRepository = directorRepository;
+        this.filmDirectorRepository = filmDirectorRepository;
     }
 
     public Collection<FilmDto> findAll() {
@@ -94,6 +96,19 @@ public class FilmService {
     public Collection<FilmDto> getTopFilms(Integer count) {
         return likeFilmRepository.topFilms(count)
                 .stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
+    }
+
+    public Collection<FilmDto> search(String query, List<String> by) {
+        log.info("Поиск фильмов по запросу:  {} (критерии: {}", query, by);
+        List<Film> films = filmRepository.search(query, by);
+
+        for (Film film : films) {
+            film.setDirectors(filmDirectorRepository.getDirectorsByFilmId(film.getId()));
+        }
+
+        return films.stream()
                 .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList());
     }

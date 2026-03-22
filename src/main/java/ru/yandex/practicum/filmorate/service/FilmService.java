@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.dal.*;
 import ru.yandex.practicum.filmorate.dto.film.FilmDto;
 import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Director;
@@ -60,6 +61,9 @@ public class FilmService {
         validateUpdate(film, newFilm);
         Film updatedFilm = FilmMapper.updateFilmFields(film, newFilm);
         filmRepository.update(updatedFilm);
+        if (newFilm.getDirectors() == null) {
+            filmDirectorRepository.deleteByFilmId(film.getId());
+        }
         log.info("Обновлена информация о фильме c id = {}", film.getId());
         return FilmMapper.mapToFilmDto(filmRepository.getFilmById(newFilm.getId()));
     }
@@ -131,7 +135,8 @@ public class FilmService {
 
     public Collection<FilmDto> getFilmsByDirector(Long directorId, String sortBy) {
 
-        directorRepository.getDirectorById(directorId);
+        directorRepository.getDirectorById(directorId)
+                .orElseThrow(() -> new NotFoundException("Режиссер с id " + directorId + " не найден"));
 
         if (sortBy == null || (!sortBy.equalsIgnoreCase("year") && !sortBy.equalsIgnoreCase("likes"))) {
             throw new ValidationException("Неверный параметр сортировки. Допустимые значения: year, likes");

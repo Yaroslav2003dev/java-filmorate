@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,7 +35,7 @@ public class DirectorController {
     }
 
     @PostMapping
-    public ResponseEntity<DirectorDto> addDirector(@RequestBody NewDirectorRequest newDirectorRequest) {
+    public ResponseEntity<DirectorDto> addDirector(@Valid @RequestBody NewDirectorRequest newDirectorRequest) {
         return new ResponseEntity<>(directorService.addDirector(newDirectorRequest), HttpStatus.CREATED);
     }
 

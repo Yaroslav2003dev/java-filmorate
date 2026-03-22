@@ -15,6 +15,7 @@ public class FilmGenreRepository extends BaseRepository<Genre> {
     private static final String FIND_BY_ID_FILM_QUERY = "SELECT g.* FROM Genre g JOIN FilmGenre fg " +
             "ON g.id=fg.genre_id" +
             " WHERE fg.film_id = ?";
+    private static final String DELETE_BY_FILM = "DELETE FROM FilmGenre WHERE film_id = ?";
 
     public FilmGenreRepository(JdbcTemplate jdbc, RowMapper<Genre> mapper) {
         super(jdbc, mapper);
@@ -26,7 +27,11 @@ public class FilmGenreRepository extends BaseRepository<Genre> {
     }
 
     public void save(Long genreId, Long filmId) {
-        jdbc.update(INSERT_QUERY, genreId, filmId);
+        update(INSERT_QUERY, genreId, filmId);
+    }
+
+    public void delete(Long filmId) {
+        delete(DELETE_BY_FILM, filmId);
     }
 
 }

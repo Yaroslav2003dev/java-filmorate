@@ -61,7 +61,7 @@ public class FilmService {
         Film updatedFilm = FilmMapper.updateFilmFields(film, newFilm);
         filmRepository.update(updatedFilm);
         log.info("Обновлена информация о фильме c id = {}", film.getId());
-        return FilmMapper.mapToFilmDto(updatedFilm);
+        return FilmMapper.mapToFilmDto(filmRepository.getFilmById(newFilm.getId()));
     }
 
     public FilmDto delete(Long id) {

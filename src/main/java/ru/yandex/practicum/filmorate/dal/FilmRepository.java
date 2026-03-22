@@ -115,6 +115,16 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
     }
 
     public void update(Film film) {
+        filmGenreRepository.delete(film.getId());
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+            for (Genre genre : film.getGenres()) {
+                genreRepository.findById(genre.getId());
+            }
+            Set<Genre> uniqueGenres = new HashSet<>(film.getGenres());
+            for (Genre genre : uniqueGenres) {
+                filmGenreRepository.save(genre.getId(), film.getId());
+            }
+        }
         update(
                 UPDATE_QUERY,
                 film.getName(),
@@ -124,7 +134,6 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
                 film.getReleaseDate(),
                 film.getId()
         );
-
         filmDirectorRepository.deleteByFilmId(film.getId());
 
         if (film.getDirectors() != null && !film.getDirectors().isEmpty()) {
@@ -139,7 +148,7 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
         String searchPattern = "%" + query.toLowerCase() + "%";
 
         StringBuilder sql = new StringBuilder(
-                        "SELECT f.* FROM film f " +
+                "SELECT f.* FROM film f " +
                         "LEFT JOIN like_film l ON f.id = l.film_id "
         );
 

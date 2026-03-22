@@ -42,9 +42,6 @@ public class ReviewMapper {
             review.setIsPositive(request.getIsPositive());
         }
 
-        if (request.hasUserId()) {
-            review.setUserId(request.getUserId());
-        }
         return review;
     }
 }

@@ -7,11 +7,6 @@ public class UpdateReviewRequest {
     private Long reviewId;
     private String content;
     private Boolean isPositive;
-    private Long userId;
-
-    public boolean hasUserId() {
-        return userId != null;
-    }
 
     public boolean hasReviewId() {
         return reviewId != null;

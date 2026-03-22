@@ -8,6 +8,7 @@ import lombok.Data;
 public class NewReviewRequest {
     @NotEmpty(message = "Отзыв не должен быть пустым")
     private String content;
+    @NotNull
     private Boolean isPositive;
     @NotNull(message = "Id пользователя должен быть указан")
     private Long userId;

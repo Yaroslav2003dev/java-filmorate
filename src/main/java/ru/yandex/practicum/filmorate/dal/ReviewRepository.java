@@ -16,7 +16,7 @@ public class ReviewRepository extends BaseRepository<Review> implements ReviewSt
             "INSERT INTO review (content, is_positive, user_id, film_id, useful) " +
                     "VALUES (?, ?, ?, ?, ?)";
     private static final String UPDATE_REVIEW_QUERY =
-            "UPDATE review SET content = ?, is_positive = ?, user_id = ?, film_id = ? " +
+            "UPDATE review SET content = ?, is_positive = ? " +
                     "WHERE id = ?";
     private static final String DELETE_REVIEW_QUERY =
             "DELETE FROM review WHERE id = ?";
@@ -98,8 +98,6 @@ public class ReviewRepository extends BaseRepository<Review> implements ReviewSt
                 UPDATE_REVIEW_QUERY,
                 review.getContent(),
                 review.getIsPositive(),
-                review.getUserId(),
-                review.getFilmId(),
                 review.getReviewId()
         );
     }

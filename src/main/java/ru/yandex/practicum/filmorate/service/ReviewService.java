@@ -43,9 +43,12 @@ public class ReviewService {
         Review updateReview = reviewStorage.getReviewById(request.getReviewId())
                 .map(review -> ReviewMapper.updateReviewFields(review, request))
                 .orElseThrow(() -> new NotFoundException("Отзыв с Id " + request.getReviewId() + " не найден"));
+
         reviewStorage.updateReview(updateReview);
+        Review findUpdatedReview = reviewStorage.getReviewById(updateReview.getReviewId())
+                .orElseThrow(() -> new NotFoundException("Отзыв с Id " + request.getReviewId() + " не найден"));
         eventService.createEvent(request.getUserId(), EventType.REVIEW, Operation.UPDATE, request.getReviewId());
-        return ReviewMapper.toDto(updateReview);
+        return ReviewMapper.toDto(findUpdatedReview);
     }
 
     public boolean deleteReview(Long id) {

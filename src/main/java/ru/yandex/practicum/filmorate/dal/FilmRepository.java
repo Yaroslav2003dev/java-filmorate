@@ -146,8 +146,8 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
         List<Object> params = new ArrayList<>();
 
         if (by.contains("director")) {
-            sql.append("LEFT JOIN film_director fd ON f.id = fd.film_id ");
-            sql.append("LEFT JOIN director d ON fd.director_id = d.id ");
+            sql.append("LEFT JOIN film_directors fd ON f.id = fd.film_id ");
+            sql.append("LEFT JOIN directors d ON fd.director_id = d.id ");
         }
 
         sql.append("WHERE ");

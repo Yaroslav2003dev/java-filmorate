@@ -7,10 +7,6 @@ CREATE TABLE IF NOT EXISTS Genre (
     name VARCHAR(100) NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS Director (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE
-);
 
 CREATE TABLE IF NOT EXISTS Film (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -43,16 +39,6 @@ CREATE TABLE IF NOT EXISTS FilmGenre (
         ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS film_director (
-    film_id BIGINT NOT NULL,
-    director_id BIGINT NOT NULL,
-
-    CONSTRAINT pk_film_director PRIMARY KEY (film_id, director_id),
-    CONSTRAINT fk_film_director_to_film
-        FOREIGN KEY (film_id) REFERENCES film(id) ON DELETE CASCADE,
-    CONSTRAINT fk_film_director_to_director
-        FOREIGN KEY (director_id) REFERENCES director(id) ON DELETE CASCADE
-);
 CREATE TABLE IF NOT EXISTS Users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) UNIQUE,

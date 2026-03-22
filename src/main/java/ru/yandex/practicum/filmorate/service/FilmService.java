@@ -127,13 +127,11 @@ public class FilmService {
                 .stream()
                 .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList());
-
     }
 
     public Collection<FilmDto> getFilmsByDirector(Long directorId, String sortBy) {
 
         directorRepository.getDirectorById(directorId);
-
 
         if (sortBy == null || (!sortBy.equalsIgnoreCase("year") && !sortBy.equalsIgnoreCase("likes"))) {
             throw new ValidationException("Неверный параметр сортировки. Допустимые значения: year, likes");
@@ -154,7 +152,10 @@ public class FilmService {
 
         List<Long> recommendedIds = likeFilmRepository.getRecommendedFilmsIds(userId);
 
-
+        return recommendedIds.stream()
+                .map(filmRepository::getFilmById)
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
     }
 
     private void validateUpdate(Film film, UpdateFilmRequest newFilm) {

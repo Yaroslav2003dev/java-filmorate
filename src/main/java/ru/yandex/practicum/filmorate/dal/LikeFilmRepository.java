@@ -50,7 +50,7 @@ public class LikeFilmRepository extends BaseRepository<Film> implements LikeStor
             "WHERE user_id = (" +
             "    SELECT other.user_id " +
             "    FROM like_film target " +
-            "    JOIN like_film other ON target.film_id = other.film_id AND target user id != other.user_id " +
+            "    JOIN like_film other ON target.film_id = other.film_id AND target.user_id != other.user_id " +
             "    WHERE target.user_id = ? " +
             "    GROUP BY other.user_id " +
             "    ORDER BY COUNT(other.film_id) DESC " +

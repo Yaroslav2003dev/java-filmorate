@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.review.NewReviewRequest;
 import ru.yandex.practicum.filmorate.dto.review.ReviewDto;
@@ -15,7 +16,7 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
@@ -25,21 +26,27 @@ public class ReviewService {
     private final FilmStorage filmStorage;
 
     public ReviewDto createReview(NewReviewRequest request) {
+        log.info("Создание отзыва: userId={}, filmId={}", request.getUserId(), request.getFilmId());
         userStorage.getUserById(request.getUserId());
         filmStorage.getFilmById(request.getFilmId());
         Review review = ReviewMapper.mapToReview(request);
         review = reviewStorage.addReview(review);
+        log.info("Отзыв создан с id={}", review.getReviewId());
         eventService.createEvent(request.getUserId(), EventType.REVIEW, Operation.ADD, review.getReviewId());
         return ReviewMapper.toDto(review);
     }
 
     public ReviewDto getReviewById(Long id) {
         Review review = reviewStorage.getReviewById(id)
-                .orElseThrow(() -> new NotFoundException("Отзыв с id " + id + " не найден"));
+                .orElseThrow(() -> {
+                    log.warn("Отзыв не найден id={}", id);
+                    return new NotFoundException("Отзыв с id " + id + " не найден");
+                });
         return ReviewMapper.toDto(review);
     }
 
     public ReviewDto updateReview(UpdateReviewRequest request) {
+        log.info("Обновление отзыва id={}", request.getReviewId());
         Review updateReview = reviewStorage.getReviewById(request.getReviewId())
                 .map(review -> ReviewMapper.updateReviewFields(review, request))
                 .orElseThrow(() -> new NotFoundException("Отзыв с Id " + request.getReviewId() + " не найден"));
@@ -51,6 +58,7 @@ public class ReviewService {
     }
 
     public boolean deleteReview(Long id) {
+        log.info("Удаление отзыва id={}", id);
         Long userId = reviewStorage.getReviewById(id).get().getUserId();
         reviewStorage.getReviewById(id).orElseThrow(
                 () -> new NotFoundException("Отзыв с id " + id + " не найден")
@@ -71,6 +79,7 @@ public class ReviewService {
     }
 
     public boolean addLike(Long reviewId, Long userId) {
+        log.info("Добавление лайка: reviewId={}, userId={}", reviewId, userId);
         reviewStorage.getReviewById(reviewId).orElseThrow(
                 () -> new NotFoundException("Отзыв с id " + reviewId + " не найден"));
         userStorage.getUserById(userId);
@@ -79,6 +88,7 @@ public class ReviewService {
     }
 
     public boolean addDisLike(Long reviewId, Long userId) {
+        log.info("Добавление дизлайка: reviewId={}, userId={}", reviewId, userId);
         reviewStorage.getReviewById(reviewId).orElseThrow(
                 () -> new NotFoundException("Отзыв с id " + reviewId + " не найден"));
         userStorage.getUserById(userId);
@@ -87,6 +97,7 @@ public class ReviewService {
     }
 
     public boolean deleteLike(Long reviewId, Long userId) {
+        log.info("Удаление лайка: reviewId={}, userId={}", reviewId, userId);
         reviewStorage.getReviewById(reviewId).orElseThrow(
                 () -> new NotFoundException("Отзыв с id " + reviewId + " не найден"));
         userStorage.getUserById(userId);
@@ -95,6 +106,7 @@ public class ReviewService {
     }
 
     public boolean deleteDisLike(Long reviewId, Long userId) {
+        log.info("Удаление дизлайка: reviewId={}, userId={}", reviewId, userId);
         reviewStorage.getReviewById(reviewId).orElseThrow(
                 () -> new NotFoundException("Отзыв с id " + reviewId + " не найден"));
         userStorage.getUserById(userId);

@@ -13,5 +13,4 @@ public class GenreMapper {
         dto.setName(genre.getName());
         return dto;
     }
-
 }

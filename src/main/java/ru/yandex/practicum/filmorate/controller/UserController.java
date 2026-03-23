@@ -5,10 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dto.event.EventDto;
+import ru.yandex.practicum.filmorate.dto.film.FilmDto;
 import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UserDto;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.EventService;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
@@ -17,11 +21,15 @@ import java.util.Collection;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private UserService userService;
+    private final UserService userService;
+    private final EventService eventService;
+    private final FilmService filmService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, EventService eventService, FilmService filmService) {
         this.userService = userService;
+        this.eventService = eventService;
+        this.filmService = filmService;
     }
 
     @GetMapping
@@ -60,8 +68,29 @@ public class UserController {
         return new ResponseEntity<>(userService.getCommonFriends(id, otherId), HttpStatus.OK);
     }
 
+    @GetMapping("/{userid}/feed")
+    public ResponseEntity<Collection<EventDto>> getEventsByUserId(@PathVariable Long userid) {
+        return new ResponseEntity<>(eventService.getEventsByUserId(userid), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<UserDto> deleteByUserId(@PathVariable Long id) {
+        return new ResponseEntity<>(userService.delete(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDto> getUserByUserId(@PathVariable Long id) {
+        return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/recommendations")
+    public ResponseEntity<Collection<FilmDto>> getRecommendations(@PathVariable Long id) {
+        return new ResponseEntity<>(filmService.getRecommendations(id), HttpStatus.OK);
+    }
+
+
     public User getUserById(Long id) {
-        return userService.getUserById(id);
+        return userService.getUserByIdForTest(id);
     }
 }
 

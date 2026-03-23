@@ -2,8 +2,10 @@ package ru.yandex.practicum.filmorate.dal.mappers;
 
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.dal.FilmDirectorRepository;
 import ru.yandex.practicum.filmorate.dal.FilmGenreRepository;
 import ru.yandex.practicum.filmorate.dal.MpaRepository;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -17,10 +19,12 @@ import java.util.List;
 public class FilmRowMapper implements RowMapper<Film> {
     private final MpaRepository mpaRepository;
     private final FilmGenreRepository filmGenreRepository;
+    private final FilmDirectorRepository filmDirectorRepository;
 
-    public FilmRowMapper(MpaRepository mpaRepository, FilmGenreRepository filmGenreRepository) {
+    public FilmRowMapper(MpaRepository mpaRepository, FilmGenreRepository filmGenreRepository, FilmDirectorRepository filmDirectorRepository) {
         this.mpaRepository = mpaRepository;
         this.filmGenreRepository = filmGenreRepository;
+        this.filmDirectorRepository = filmDirectorRepository;
     }
 
     @Override
@@ -35,6 +39,8 @@ public class FilmRowMapper implements RowMapper<Film> {
         film.setMpa(mpa);
         List<Genre> idGenres = filmGenreRepository.getListIdFilmGenreById(resultSet.getLong("id"));
         film.setGenres(idGenres);
+        List<Director> directors = filmDirectorRepository.getDirectorsByFilmId(resultSet.getLong("id"));
+        film.setDirectors(directors);
         return film;
     }
 }

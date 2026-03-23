@@ -14,7 +14,6 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -22,11 +21,13 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserRepository userRepository;
     private final FriendRequestRepository friendRequestRepository;
+    private final EventService eventService;
 
     @Autowired
-    public UserService(UserRepository userRepository, FriendRequestRepository friendRequestRepository) {
+    public UserService(UserRepository userRepository, FriendRequestRepository friendRequestRepository, EventService eventService) {
         this.userRepository = userRepository;
         this.friendRequestRepository = friendRequestRepository;
+        this.eventService = eventService;
     }
 
     public Collection<UserDto> findAll() {
@@ -52,6 +53,22 @@ public class UserService {
         userRepository.update(updatedUser);
         log.info("Обновлена информация о пользователе c id = {}", user.getId());
         return UserMapper.mapToUserDto(user);
+    }
+
+    public UserDto delete(Long id) {
+        User user = userRepository.getUserById(id);
+        userRepository.delete(id);
+        log.info("Удалён пользователь c id = {}", id);
+        return UserMapper.mapToUserDto(user);
+    }
+
+    public UserDto getUserById(Long id) {
+        User user = userRepository.getUserById(id);
+        return UserMapper.mapToUserDto(user);
+    }
+
+    public User getUserByIdForTest(Long id) {
+        return userRepository.getUserById(id);
     }
 
     private void validateCreate(NewUserRequest user) {
@@ -112,18 +129,9 @@ public class UserService {
     }
 
 
-    public User getUserById(Long id) {
-        return userRepository.getUserById(id);
-    }
-
     public UserDto addFriend(Long userId, Long friendId) {
-
-        System.out.println("id= " + userId);
-        System.out.println("friendId= " + friendId);
-
-        System.out.println("Началась подписка на " + friendId);
         friendRequestRepository.addFriend(userId, friendId);
-        System.out.println(userId + " подписан на " + friendId);
+        eventService.createEvent(userId, EventType.FRIEND, Operation.ADD, friendId);
         return UserMapper.mapToUserDto(userRepository.getUserById(friendId));
     }
 
@@ -131,15 +139,12 @@ public class UserService {
         userRepository.getUserById(userId);
         userRepository.getUserById(friendId);
         friendRequestRepository.deleteFriend(userId, friendId);
+        eventService.createEvent(userId, EventType.FRIEND, Operation.REMOVE, friendId);
         return UserMapper.mapToUserDto(userRepository.getUserById(friendId));
     }
 
     public Collection<UserDto> getAllFriends(Long id) {
         userRepository.getUserById(id);
-        System.out.println("Ищем друзей юзера с id = " + id);
-        List<Long> idFriends = friendRequestRepository.findAllIdFriends(id);
-        System.out.println("Вот друзья юзера с id = " + id + ": " + idFriends);
-
         return userRepository.findAllById(friendRequestRepository.findAllIdFriends(id)).stream()
                 .map(UserMapper::mapToUserDto)
                 .collect(Collectors.toList());

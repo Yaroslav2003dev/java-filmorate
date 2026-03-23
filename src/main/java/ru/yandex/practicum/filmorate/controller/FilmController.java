@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 
 
 import java.util.Collection;
+import java.util.List;
 
 
 @Slf4j
@@ -40,6 +41,11 @@ public class FilmController {
         return new ResponseEntity<>(filmService.update(updateFilmRequest), HttpStatus.OK);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<FilmDto> update(@PathVariable Long id) {
+        return new ResponseEntity<>(filmService.delete(id), HttpStatus.OK);
+    }
+
     @PutMapping("/{id}/like/{userId}")
     public ResponseEntity<FilmDto> addLike(@PathVariable Long id, @PathVariable Long userId) {
         return new ResponseEntity<>(filmService.addLike(id, userId), HttpStatus.OK);
@@ -51,13 +57,42 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public ResponseEntity<Collection<FilmDto>> getTopFilms(@RequestParam(defaultValue = "10") Integer count) {
-        return new ResponseEntity<>(filmService.getTopFilms(count), HttpStatus.OK);
+    public ResponseEntity<Collection<FilmDto>> getTopFilms(
+            @RequestParam(required = false) Integer count,
+            @RequestParam(required = false) Long genreId,
+            @RequestParam(required = false) Integer year) {
+
+        if (genreId == null && year == null) {
+            if (count == null) {
+                count = 10;
+            }
+            return ResponseEntity.ok(filmService.getTopFilms(count));
+        } else {
+            return ResponseEntity.ok(
+                    filmService.getMostPopularsFilmByGenreAndYear(genreId, year));
+        }
+    }
+
+    @GetMapping("/common")
+    public ResponseEntity<Collection<FilmDto>> getCommonFilms(@RequestParam Long userId, @RequestParam Long friendId) {
+        return new ResponseEntity<>(filmService.getCommonFilms(userId, friendId), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<FilmDto> getFilmById(@PathVariable Long id) {
         return new ResponseEntity<>(filmService.getFilmById(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Collection<FilmDto>> search(@RequestParam("query") String query,
+                                                      @RequestParam("by") List<String> by) {
+        return new ResponseEntity<>(filmService.search(query, by), HttpStatus.OK);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public ResponseEntity<Collection<FilmDto>> getFilmsByDirector(@PathVariable Long directorId,
+                                                                  @RequestParam String sortBy) {
+        return new ResponseEntity<>(filmService.getFilmsByDirector(directorId, sortBy), HttpStatus.OK);
     }
 
     public FilmDto getFilmByIdInner(Long id) {

@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS Genre (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE
 );
+
+
 CREATE TABLE IF NOT EXISTS Film (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -19,6 +21,7 @@ CREATE TABLE IF NOT EXISTS Film (
         REFERENCES Mpa(id)
         ON DELETE RESTRICT
 );
+
 CREATE TABLE IF NOT EXISTS FilmGenre (
     film_id BIGINT NOT NULL,
     genre_id BIGINT NOT NULL,
@@ -35,6 +38,7 @@ CREATE TABLE IF NOT EXISTS FilmGenre (
         REFERENCES Genre(id)
         ON DELETE CASCADE
 );
+
 CREATE TABLE IF NOT EXISTS Users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) UNIQUE,
@@ -65,4 +69,76 @@ CREATE TABLE IF NOT EXISTS friend_request (
     CONSTRAINT pk_friend_request PRIMARY KEY (sender_id, receiver_id),
     CONSTRAINT fk_friend_sender FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_friend_receiver FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS Event (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    event_timestamp BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    event_type VARCHAR(20) NOT NULL,
+    operation VARCHAR(20) NOT NULL,
+    entity_id BIGINT NOT NULL,
+
+    CONSTRAINT fk_event_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS review (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    content VARCHAR(2000) NOT NULL,
+    is_positive BOOLEAN NOT NULL,
+    user_id BIGINT NOT NULL,
+    film_id BIGINT NOT NULL,
+    useful INT NOT NULL DEFAULT 0,
+
+    CONSTRAINT fk_review_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_review_film
+        FOREIGN KEY (film_id)
+        REFERENCES film(id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS review_reaction (
+    review_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    is_like BOOLEAN NOT NULL,
+
+    PRIMARY KEY (review_id, user_id),
+
+    CONSTRAINT fk_reaction_review
+        FOREIGN KEY (review_id)
+        REFERENCES review(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_reaction_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS directors (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS film_directors (
+    film_id BIGINT NOT NULL,
+    director_id BIGINT NOT NULL,
+
+    PRIMARY KEY (film_id, director_id),
+
+    CONSTRAINT fk_film_directors_film
+        FOREIGN KEY (film_id)
+        REFERENCES Film(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_film_directors_director
+        FOREIGN KEY (director_id)
+        REFERENCES directors(id)
+        ON DELETE CASCADE
 );

@@ -7,14 +7,16 @@ import ru.yandex.practicum.filmorate.dal.*;
 import ru.yandex.practicum.filmorate.dto.film.FilmDto;
 import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import javax.swing.*;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 
@@ -24,12 +26,19 @@ public class FilmService {
     private final FilmRepository filmRepository;
     private final UserRepository userRepository;
     private final LikeFilmRepository likeFilmRepository;
+    private final EventService eventService;
+    private final DirectorRepository directorRepository;
+    private final FilmDirectorRepository filmDirectorRepository;
+
 
     @Autowired
-    public FilmService(FilmRepository filmRepository, UserRepository userRepository, LikeFilmRepository likeFilmRepository) {
+    public FilmService(FilmRepository filmRepository, UserRepository userRepository, LikeFilmRepository likeFilmRepository, EventService eventService, DirectorRepository directorRepository, FilmDirectorRepository filmDirectorRepository) {
         this.filmRepository = filmRepository;
         this.userRepository = userRepository;
         this.likeFilmRepository = likeFilmRepository;
+        this.eventService = eventService;
+        this.directorRepository = directorRepository;
+        this.filmDirectorRepository = filmDirectorRepository;
     }
 
     public Collection<FilmDto> findAll() {
@@ -52,14 +61,25 @@ public class FilmService {
         validateUpdate(film, newFilm);
         Film updatedFilm = FilmMapper.updateFilmFields(film, newFilm);
         filmRepository.update(updatedFilm);
+        if (newFilm.getDirectors() == null) {
+            filmDirectorRepository.deleteByFilmId(film.getId());
+        }
         log.info("Обновлена информация о фильме c id = {}", film.getId());
-        return FilmMapper.mapToFilmDto(updatedFilm);
+        return FilmMapper.mapToFilmDto(filmRepository.getFilmById(newFilm.getId()));
+    }
+
+    public FilmDto delete(Long id) {
+        Film film = filmRepository.getFilmById(id);
+        filmRepository.delete(id);
+        log.info("Удалён фильм c id = {}", id);
+        return FilmMapper.mapToFilmDto(film);
     }
 
     public FilmDto addLike(Long filmId, Long userId) {
         filmRepository.getFilmById(filmId);
         userRepository.getUserById(userId);
         likeFilmRepository.addLike(filmId, userId);
+        eventService.createEvent(userId, EventType.LIKE, Operation.ADD, filmId);
         log.info("Добавлен лайк фильму c id = {} пользователем c id = {}", filmId, userId);
         return FilmMapper.mapToFilmDto(filmRepository.getFilmById(filmId));
     }
@@ -68,6 +88,7 @@ public class FilmService {
         filmRepository.getFilmById(filmId);
         userRepository.getUserById(userId);
         likeFilmRepository.deleteLike(filmId, userId);
+        eventService.createEvent(userId, EventType.LIKE, Operation.REMOVE, filmId);
         log.info("Удалён лайк фильму c id = {} пользователем c id = {}", filmId, userId);
         return FilmMapper.mapToFilmDto(filmRepository.getFilmById(filmId));
     }
@@ -79,6 +100,65 @@ public class FilmService {
     public Collection<FilmDto> getTopFilms(Integer count) {
         return likeFilmRepository.topFilms(count)
                 .stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
+    }
+
+    public Collection<FilmDto> search(String query, List<String> by) {
+        log.info("Поиск фильмов по запросу:  {} (критерии: {}", query, by);
+        List<Film> films = filmRepository.search(query, by);
+
+        for (Film film : films) {
+            film.setDirectors(filmDirectorRepository.getDirectorsByFilmId(film.getId()));
+        }
+
+        return films.stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
+    }
+
+
+    public List<FilmDto> getMostPopularsFilmByGenreAndYear(Long genreId, Integer year) {
+        return likeFilmRepository.mostPopularsFilms(genreId, year)
+                .stream()
+                .map(FilmMapper::mapToFilmDto)
+                .toList();
+    }
+
+    public Collection<FilmDto> getCommonFilms(Long userId, Long friendId) {
+
+        return filmRepository.getCommonFilms(userId, friendId)
+                .stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
+    }
+
+    public Collection<FilmDto> getFilmsByDirector(Long directorId, String sortBy) {
+
+        directorRepository.getDirectorById(directorId)
+                .orElseThrow(() -> new NotFoundException("Режиссер с id " + directorId + " не найден"));
+
+        if (sortBy == null || (!sortBy.equalsIgnoreCase("year") && !sortBy.equalsIgnoreCase("likes"))) {
+            throw new ValidationException("Неверный параметр сортировки. Допустимые значения: year, likes");
+        }
+
+        List<Film> films = filmRepository.getFilmsByDirector(directorId, sortBy);
+        log.info("Получено {} фильмов режиссера с id = {}, сортировка по {}", films.size(), directorId, sortBy);
+
+        return films.stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
+    }
+
+    public Collection<FilmDto> getRecommendations(Long userId) {
+        userRepository.getUserById(userId);
+
+        log.info("Запрос рекомендация для пользователя с id = {}", userId);
+
+        List<Long> recommendedIds = likeFilmRepository.getRecommendedFilmsIds(userId);
+
+        return recommendedIds.stream()
+                .map(filmRepository::getFilmById)
                 .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList());
     }
@@ -110,6 +190,11 @@ public class FilmService {
             throw new ValidationException("продолжительность фильма должна быть положительным числом");
         } else {
             film.setDuration(newFilm.getDuration());
+        }
+        if (newFilm.getDirectors() != null && !newFilm.getDirectors().isEmpty()) {
+            for (Director director : newFilm.getDirectors()) {
+                directorRepository.getDirectorById(director.getId());
+            }
         }
     }
 

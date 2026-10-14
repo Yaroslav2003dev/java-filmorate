@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.dto.film;
 
 import lombok.Builder;
 import lombok.Data;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
@@ -18,6 +19,7 @@ public class UpdateFilmRequest {
     private Mpa mpa;
     private LocalDate releaseDate;
     private List<Genre> genres;
+    private List<Director> directors;
 
     public boolean hasName() {
         return !(name == null || name.isBlank());
@@ -41,5 +43,9 @@ public class UpdateFilmRequest {
 
     public boolean hasGenres() {
         return !(genres == null);
+    }
+
+    public boolean hasDirectors() {
+        return !(directors == null);
     }
 }
